@@ -14,9 +14,11 @@ import Toast from '../Toast/Toast';
 import { personalInfo } from '../../data/portfolioData';
 import './Contact.css';
 
-const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
-const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+/* .trim() guards against stray whitespace (e.g. a tab pasted into a
+   Vercel env var), which otherwise makes EmailJS reject the key as invalid. */
+const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID?.trim();
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID?.trim();
+const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY?.trim();
 
 /* SVG icons */
 const GithubIcon = () => (
