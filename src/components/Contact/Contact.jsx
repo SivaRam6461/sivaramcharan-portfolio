@@ -86,7 +86,8 @@ export default function Contact() {
       setToastType('success');
       setToastMessage("Message sent! I'll get back to you within 24 hours.");
       setShowToast(true);
-    } catch {
+    } catch (err) {
+      console.error('EmailJS send failed:', err);
       setToastType('error');
       setToastMessage('Something went wrong sending your message — please try again or email me directly.');
       setShowToast(true);

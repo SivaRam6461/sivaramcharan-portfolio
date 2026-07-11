@@ -77,6 +77,7 @@ export default function EasterEgg() {
     let progress = 0;
 
     const onKeyDown = (e) => {
+      if (!e.key) return;   // ignore synthetic keydowns (e.g. autofill) with no key
       const expected = KONAMI_SEQUENCE[progress];
       const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
 

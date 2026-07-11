@@ -90,7 +90,7 @@ export default function CommandPalette() {
   /* Global Ctrl/Cmd+K to open, Esc to close */
   useEffect(() => {
     const onKeyDown = (e) => {
-      const isK = e.key.toLowerCase() === 'k';
+      const isK = e.key?.toLowerCase() === 'k';   // e.key can be undefined for autofill events
       if ((e.metaKey || e.ctrlKey) && isK) {
         e.preventDefault();
         triggerElRef.current = document.activeElement;
