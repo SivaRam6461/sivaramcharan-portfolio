@@ -1,0 +1,161 @@
+/* ============================================================
+   components/Contact/Contact.css
+   ============================================================ */
+
+#contact { background: var(--bg); }
+
+/* Two-column layout: info on left, form on right */
+#contact .section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 72px;
+  align-items: start;
+}
+
+/* ── Left column: headings + contact links ── */
+.contact-info h3 {
+  font-family: var(--font-head);
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.contact-info p {
+  color: var(--text2);
+  font-size: 0.9rem;
+  line-height: 1.8;
+  margin-bottom: 32px;
+}
+
+/* Stack of email/github/linkedin rows */
+.contact-links { display: flex; flex-direction: column; gap: 12px; }
+
+/* Each link row */
+.contact-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+.contact-link:hover {
+  border-color: rgba(0,245,255,0.3);
+  transform: translateX(6px);
+}
+
+/* Square icon container */
+.contact-link-icon {
+  width: 38px; height: 38px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+.contact-link-icon.email   { background: rgba(0,245,255,0.1); color: var(--cyan); }
+.contact-link-icon.github  { background: rgba(255,255,255,0.07); color: var(--text); }
+.contact-link-icon.linkedin{ background: rgba(59,130,246,0.1); color: #60a5fa; }
+
+.contact-link-text { line-height: 1; }
+.contact-link-label {
+  font-size: 0.72rem;
+  color: var(--text3);
+  display: block;
+  margin-bottom: 3px;
+}
+.contact-link-val { font-size: 0.88rem; color: var(--text2); }
+
+/* ── Right column: contact form ── */
+.contact-form {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+}
+
+.form-group { margin-bottom: 20px; }
+
+.form-group label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text2);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+/* Text inputs and textarea */
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  resize: none;
+}
+.form-group input::placeholder,
+.form-group textarea::placeholder { color: var(--text3); }
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(0,245,255,0.1);
+  background: rgba(0,245,255,0.03);
+}
+
+/* Inline error message under field */
+.form-error {
+  color: #f87171;
+  font-size: 0.75rem;
+  margin-top: 5px;
+  display: none;
+}
+.form-error.show { display: block; }
+
+/* Full-width submit button */
+.submit-btn {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  transition: all 0.2s;
+  cursor: pointer;
+  border: none;
+}
+.submit-btn:hover { opacity: 0.88; transform: translateY(-2px); }
+.submit-btn:active { transform: translateY(0); }
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Success state shown after form submits */
+.form-success {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 24px;
+  text-align: center;
+}
+.form-success.show { display: flex; }
+.form-success .success-icon { font-size: 3.5rem; }
+.form-success h4 { font-family: var(--font-head); font-size: 1.3rem; }
+.form-success p  { color: var(--text2); font-size: 0.9rem; }
+
+/* Stack on tablet/mobile */
+@media (max-width: 900px) {
+  #contact .section { grid-template-columns: 1fr; gap: 48px; }
+}

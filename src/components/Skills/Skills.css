@@ -1,0 +1,82 @@
+/* ============================================================
+   components/Skills/Skills.css
+   ============================================================ */
+
+#skills { background: var(--bg); }
+
+/* Responsive auto-fill grid */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin-top: 56px;
+}
+
+/* Individual category card */
+.skill-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated top gradient bar — slides in on hover */
+.skill-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--cyan), var(--purple));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+}
+.skill-card:hover { border-color: rgba(0,245,255,0.2); transform: translateY(-4px); box-shadow: var(--glow-cyan); }
+.skill-card:hover::before { transform: scaleX(1); }
+
+/* Icon + category name row */
+.skill-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.skill-icon { font-size: 1.6rem; }
+.skill-cat { font-family: var(--font-head); font-size: 1rem; font-weight: 700; }
+
+/* Pill group */
+.skill-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Individual skill pill */
+.skill-pill {
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  font-size: 0.78rem;
+  color: var(--text2);
+  transition: all 0.2s;
+  cursor: default;
+}
+.skill-pill:hover {
+  background: rgba(0,245,255,0.08);
+  border-color: var(--cyan);
+  color: var(--cyan);
+  transform: scale(1.04);
+}
+
+/* "Currently exploring" note below grid */
+.skills-footer {
+  margin-top: 32px;
+  padding: 18px 24px;
+  background: rgba(168,85,247,0.06);
+  border: 1px solid rgba(168,85,247,0.2);
+  border-radius: var(--radius);
+  text-align: center;
+  color: var(--text2);
+  font-size: 0.9rem;
+}
+.skills-footer span { color: var(--purple); font-weight: 600; }

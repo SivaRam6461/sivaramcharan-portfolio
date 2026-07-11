@@ -1,0 +1,90 @@
+/* ============================================================
+   components/CommandPalette/CommandPalette.css
+   ============================================================ */
+
+.cmdk-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500; /* above everything, including easter-egg confetti (400) */
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12vh 20px 20px;
+}
+
+.cmdk-panel {
+  width: 100%;
+  max-width: 560px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.cmdk-input-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cmdk-input-icon {
+  color: var(--cyan);
+  font-size: 1.1rem;
+}
+
+.cmdk-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+}
+.cmdk-input::placeholder { color: var(--text3); }
+
+.cmdk-esc {
+  font-size: 0.7rem;
+  padding: 3px 7px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  color: var(--text3);
+  font-family: var(--font-body);
+}
+
+.cmdk-list {
+  list-style: none;
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.cmdk-item {
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
+  color: var(--text2);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.cmdk-item.active,
+.cmdk-item:hover {
+  background: rgba(0, 245, 255, 0.08);
+  color: var(--text);
+}
+
+.cmdk-empty {
+  padding: 20px 14px;
+  text-align: center;
+  color: var(--text3);
+  font-size: 0.88rem;
+}
+
+@media (max-width: 600px) {
+  .cmdk-overlay { padding: 8vh 12px 12px; }
+}

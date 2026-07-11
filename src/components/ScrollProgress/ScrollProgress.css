@@ -1,0 +1,15 @@
+/* ============================================================
+   components/ScrollProgress/ScrollProgress.css
+   ============================================================ */
+
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--cyan), var(--purple), var(--pink));
+  transform-origin: left;
+  z-index: 200; /* above navbar (100) so it's always visible */
+  pointer-events: none;
+}

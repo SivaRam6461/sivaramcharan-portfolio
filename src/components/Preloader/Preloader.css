@@ -1,0 +1,86 @@
+/* ============================================================
+   components/Preloader/Preloader.css
+   ============================================================ */
+
+/* Full-screen overlay shown while page loads */
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 24px;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+
+/* Fade out class added by JS after 2.6s */
+.preloader.hide {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Container for spinning ring + initials */
+.loader-ring {
+  width: 80px;
+  height: 80px;
+  position: relative;
+}
+
+/* Outer and inner spinning rings */
+.loader-ring::before,
+.loader-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  animation: spin 1.2s linear infinite;
+}
+.loader-ring::before {
+  border-top-color: var(--cyan);
+  border-right-color: var(--cyan);
+}
+.loader-ring::after {
+  inset: 10px;
+  border-bottom-color: var(--purple);
+  animation-duration: 1.8s;
+  animation-direction: reverse;
+}
+
+/* Initials shown in ring center */
+.loader-initials {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-head);
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+/* Progress bar track */
+.loader-bar {
+  width: 180px;
+  height: 2px;
+  background: var(--surface2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+/* Indeterminate sliding fill — loops until the real page load finishes,
+   instead of a fixed-duration animation that pretended to track progress */
+.loader-bar-fill {
+  height: 100%;
+  width: 40%;
+  background: linear-gradient(90deg, var(--cyan), var(--purple));
+  animation: loadSlide 1.4s ease-in-out infinite;
+}
+
+@keyframes loadSlide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+}
