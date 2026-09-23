@@ -37,6 +37,12 @@ const prefersReducedMotion = () =>
   typeof window !== 'undefined' &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// Touch devices: skip per-card parallax (N× getBoundingClientRect per
+// frame is a major source of mobile scroll jank).
+const isCoarsePointer = () =>
+  typeof window !== 'undefined' &&
+  window.matchMedia('(pointer: coarse)').matches;
+
 /* ── Single stacking card ── */
 function StackingCard({ i, project, total, progress, onView }) {
   const wrapRef = useRef(null);
@@ -56,7 +62,7 @@ function StackingCard({ i, project, total, progress, onView }) {
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
-    if (prefersReducedMotion()) {
+    if (prefersReducedMotion() || isCoarsePointer()) {
       imgProgress.set(1);
       return;
     }
@@ -210,9 +216,8 @@ export default function ProjectsStacking({ projects = [], onView }) {
     let rafId = null;
     const update = () => {
       rafId = null;
+      // Off-screen: skip layout reads entirely (mobile-friendly).
       const rect = el.getBoundingClientRect();
-      // Skip work when the stacking section is entirely off-screen —
-      // avoids forced layout on every frame while elsewhere on the page.
       if (rect.bottom < -200 || rect.top > window.innerHeight + 200) return;
       const denom = rect.height - window.innerHeight;
       const p = denom > 0 ? -rect.top / denom : 0;

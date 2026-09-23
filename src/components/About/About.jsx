@@ -172,11 +172,17 @@ export default function About() {
 
     // rAF-throttle: measuring every chapter/timeline rect on each raw
     // scroll event + setState re-renders the section mid-scroll (jank).
+    const aboutSec = document.getElementById('about');
     let rafId = null;
     const handleScroll = () => {
       if (rafId != null) return;
       rafId = requestAnimationFrame(() => {
         rafId = null;
+        // Section fully off-screen: skip ~N getBoundingClientRect calls.
+        if (aboutSec) {
+          const secRect = aboutSec.getBoundingClientRect();
+          if (secRect.bottom < 0 || secRect.top > window.innerHeight) return;
+        }
         const focalPoint = window.innerHeight * 0.35;
         let closest = 'intro';
         let minDist = Infinity;

@@ -233,14 +233,22 @@ export default function Skills() {
     canvas.addEventListener('mousemove', handleCanvasHover);
     canvas.addEventListener('mouseleave', handleCanvasLeave);
 
+    // Only track move/end while a drag started on the canvas — a
+    // permanent window touchmove listener adds main-thread work on
+    // every phone scroll gesture.
+    let touchDragging = false;
     const handleTouchStart = (e) => {
       if (e.touches.length === 1) {
+        touchDragging = true;
         isDragging = true;
         previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        window.addEventListener('touchmove', handleTouchMove, { passive: true });
+        window.addEventListener('touchend', handleTouchEnd, { passive: true });
+        window.addEventListener('touchcancel', handleTouchEnd, { passive: true });
       }
     };
     const handleTouchMove = (e) => {
-      if (!isDragging || e.touches.length !== 1) return;
+      if (!touchDragging || !isDragging || e.touches.length !== 1) return;
       const deltaX = e.touches[0].clientX - previousMousePosition.x;
       const deltaY = e.touches[0].clientY - previousMousePosition.y;
       velYaw = deltaX * 0.005;
@@ -249,11 +257,15 @@ export default function Skills() {
       dragPitch += velPitch;
       previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     };
-    const handleTouchEnd = () => { isDragging = false; };
+    const handleTouchEnd = () => {
+      touchDragging = false;
+      isDragging = false;
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchcancel', handleTouchEnd);
+    };
 
     canvas.addEventListener('touchstart', handleTouchStart, { passive: true });
-    window.addEventListener('touchmove', handleTouchMove, { passive: true });
-    window.addEventListener('touchend', handleTouchEnd);
 
     const render = () => {
       animationFrameId = requestAnimationFrame(render);
@@ -491,6 +503,7 @@ export default function Skills() {
       canvas.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchcancel', handleTouchEnd);
       canvas.removeEventListener('click', handleCanvasClick);
       cancelAnimationFrame(animationFrameId);
     };

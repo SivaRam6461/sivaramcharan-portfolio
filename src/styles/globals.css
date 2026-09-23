@@ -24,6 +24,21 @@
     background-color: #0b0c10;
     color: #ffffff;
     font-family: 'Space Grotesk', sans-serif;
+    /* Encourage composited scrolling on iOS/Android; never pair with
+       scroll-behavior: smooth (Lenis owns smooth scroll). */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: none;
+  }
+
+  /* Fixed/sticky frosted glass is very expensive while scrolling on
+     phones — drop blur under 1024px, keep a near-solid surface. */
+  @media (max-width: 1023px) {
+    .surface-card,
+    .about-nav,
+    .about-mobile-nav {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
   }
 
   h1, h2, h3, .font-head {

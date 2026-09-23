@@ -102,7 +102,7 @@ export default function Navbar({ onOpenCmd }) {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-500 ${
-        lightTheme ? 'bg-[#faf9f7]/80 backdrop-blur-md' : 'bg-[#0b0c10]/80 backdrop-blur-md'
+        lightTheme ? 'bg-[#faf9f7]/95 lg:bg-[#faf9f7]/80 lg:backdrop-blur-md' : 'bg-[#0b0c10]/95 lg:bg-[#0b0c10]/80 lg:backdrop-blur-md'
       }`}
     >
       <div className="max-w-[1440px] mx-auto px-6 md:px-10 flex items-center justify-between h-16">
