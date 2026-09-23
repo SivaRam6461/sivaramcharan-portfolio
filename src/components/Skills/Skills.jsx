@@ -100,7 +100,21 @@ export default function Skills() {
     const ctx = canvas.getContext('2d');
     let animationFrameId;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
     let canvasVisible = true;
+
+    // While the page is scrolling on touch devices, freeze the canvas
+    // paint — a full 2D scene every frame steals the main thread from
+    // scroll and is the top cause of Skills-section jank on phones.
+    let scrollActive = false;
+    let scrollIdleTimer = null;
+    const onScrollPaint = () => {
+      if (!coarsePointer) return;
+      scrollActive = true;
+      clearTimeout(scrollIdleTimer);
+      scrollIdleTimer = setTimeout(() => { scrollActive = false; }, 120);
+    };
+    window.addEventListener('scroll', onScrollPaint, { passive: true });
 
     // Buffer must match CSS size 1:1 (else the orbit renders as an oval),
     // multiplied by devicePixelRatio so lines stay razor-sharp on retina.
@@ -270,6 +284,8 @@ export default function Skills() {
     const render = () => {
       animationFrameId = requestAnimationFrame(render);
       if (!canvasVisible) return;
+      // Phone + mid-scroll: skip the expensive scene entirely this frame.
+      if (scrollActive) return;
 
       const time = (performance.now() - timeStart) / 1000;
       ctx.clearRect(0, 0, width, height);
@@ -318,17 +334,22 @@ export default function Skills() {
 
       nodes.sort((a, b) => a.z2 - b.z2);
 
-      // Backdrop glow
-      const glowR = Math.min(width, height) * 0.5;
-      const glow = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, glowR);
-      glow.addColorStop(0, 'rgba(255, 79, 18, 0.07)');
-      glow.addColorStop(0.55, 'rgba(255, 79, 18, 0.025)');
-      glow.addColorStop(1, 'rgba(255, 79, 18, 0)');
-      ctx.fillStyle = glow;
-      ctx.fillRect(0, 0, width, height);
+      // Backdrop glow (skip on phones — createRadialGradient each frame
+      // is costly while the section is on screen during scroll)
+      if (!coarsePointer) {
+        const glowR = Math.min(width, height) * 0.5;
+        const glow = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, glowR);
+        glow.addColorStop(0, 'rgba(255, 79, 18, 0.07)');
+        glow.addColorStop(0.55, 'rgba(255, 79, 18, 0.025)');
+        glow.addColorStop(1, 'rgba(255, 79, 18, 0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, 0, width, height);
+      }
 
-      // Drifting dust
-      dust.forEach((d) => {
+      // Drifting dust (fewer particles on phones)
+      const dustCount = coarsePointer ? 18 : dust.length;
+      for (let di = 0; di < dustCount; di++) {
+        const d = dust[di];
         if (!prefersReducedMotion) {
           d.x += d.vx;
           d.y += d.vy;
@@ -343,7 +364,7 @@ export default function Skills() {
           ? `rgba(255, 79, 18, ${d.a})`
           : `rgba(11, 11, 11, ${d.a})`;
         ctx.fill();
-      });
+      }
 
       const selectedId = selectedSkillRef.current ? selectedSkillRef.current.id : null;
       const neighbors = selectedId ? neighborsOf(selectedId) : null;
@@ -494,6 +515,8 @@ export default function Skills() {
 
     return () => {
       intersectionObserver.disconnect();
+      window.removeEventListener('scroll', onScrollPaint);
+      clearTimeout(scrollIdleTimer);
       window.removeEventListener('resize', handleResize);
       canvas.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mousemove', handleMouseMove);

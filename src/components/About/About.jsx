@@ -170,47 +170,60 @@ export default function About() {
     checkDesktop();
     window.addEventListener('resize', checkDesktop);
 
-    // rAF-throttle: measuring every chapter/timeline rect on each raw
-    // scroll event + setState re-renders the section mid-scroll (jank).
+    // Cache element refs once — getElementById ×13 every frame forces
+    // work that doesn't change. Re-resolve only on resize (layout shift).
+    let chapterEls = [];
+    let timelineEls = [];
+    let allTimelineSeen = false;
+    const resolveEls = () => {
+      chapterEls = CHAPTERS.map((c) => document.getElementById(`about-${c.id}`));
+      timelineEls = TIMELINE.map((_, i) => document.getElementById(`timeline-${i}`));
+      allTimelineSeen = false;
+    };
+
     const aboutSec = document.getElementById('about');
+    resolveEls();
     let rafId = null;
     const handleScroll = () => {
       if (rafId != null) return;
       rafId = requestAnimationFrame(() => {
         rafId = null;
-        // Section fully off-screen: skip ~N getBoundingClientRect calls.
+        // Section fully off-screen: skip all measurement.
         if (aboutSec) {
           const secRect = aboutSec.getBoundingClientRect();
           if (secRect.bottom < 0 || secRect.top > window.innerHeight) return;
         }
-        const focalPoint = window.innerHeight * 0.35;
+        const vh = window.innerHeight;
+        const focalPoint = vh * 0.35;
         let closest = 'intro';
         let minDist = Infinity;
 
-        CHAPTERS.forEach((c) => {
-          const el = document.getElementById(`about-${c.id}`);
-          if (el) {
-            const rect = el.getBoundingClientRect();
-            const dist = Math.abs(rect.top - focalPoint);
-            if (rect.top <= window.innerHeight * 0.8 && dist < minDist) {
-              minDist = dist;
-              closest = c.id;
-            }
+        for (let i = 0; i < chapterEls.length; i++) {
+          const el = chapterEls[i];
+          if (!el) continue;
+          const rect = el.getBoundingClientRect();
+          const dist = Math.abs(rect.top - focalPoint);
+          if (rect.top <= vh * 0.8 && dist < minDist) {
+            minDist = dist;
+            closest = CHAPTERS[i].id;
           }
-        });
+        }
 
         setActiveChapter((prev) => (prev === closest ? prev : closest));
 
+        // Timeline reveal is monotonic — once every item is in view,
+        // stop measuring rects (biggest win while scrolling this section).
+        if (allTimelineSeen) return;
         const newVisible = new Set();
-        TIMELINE.forEach((_, i) => {
-          const el = document.getElementById(`timeline-${i}`);
-          if (el) {
-            const rect = el.getBoundingClientRect();
-            if (rect.top < window.innerHeight * 0.75) {
-              newVisible.add(i);
-            }
-          }
-        });
+        let allSeen = true;
+        for (let i = 0; i < timelineEls.length; i++) {
+          const el = timelineEls[i];
+          if (!el) { allSeen = false; continue; }
+          const rect = el.getBoundingClientRect();
+          if (rect.top < vh * 0.75) newVisible.add(i);
+          else allSeen = false;
+        }
+        if (allSeen) allTimelineSeen = true;
         setVisibleTimeline((prev) => {
           if (prev.size === newVisible.size) {
             let same = true;
@@ -226,8 +239,11 @@ export default function About() {
 
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
+    const onResize = () => { resolveEls(); handleScroll(); };
+    window.addEventListener('resize', onResize);
     return () => {
       window.removeEventListener('resize', checkDesktop);
+      window.removeEventListener('resize', onResize);
       window.removeEventListener('scroll', handleScroll);
       if (rafId != null) cancelAnimationFrame(rafId);
     };

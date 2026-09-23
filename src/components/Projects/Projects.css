@@ -634,6 +634,12 @@
     padding: 0 20px;
   }
 
+  /* Full-section decorative gradients/dots repaint under sticky cards. */
+  .projects-bg-grid,
+  .projects-bg-dots {
+    display: none;
+  }
+
   .projects-header {
     padding: 60px 0 24px;
   }
@@ -653,6 +659,10 @@
     gap: 10px;
     border-radius: 18px;
     will-change: auto;
+    /* No motion-driven scale on phones (staticScale) — avoid will-change
+       layers that never animate but still cost memory/compositing. */
+    transform: none !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
   }
 
   .stack-card-wrap .project-card-info {

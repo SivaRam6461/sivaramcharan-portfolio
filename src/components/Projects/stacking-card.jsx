@@ -44,7 +44,7 @@ const isCoarsePointer = () =>
   window.matchMedia('(pointer: coarse)').matches;
 
 /* ── Single stacking card ── */
-function StackingCard({ i, project, total, progress, onView }) {
+function StackingCard({ i, project, total, progress, onView, staticScale }) {
   const wrapRef = useRef(null);
   const imgProgress = useMotionValue(0);
 
@@ -62,7 +62,7 @@ function StackingCard({ i, project, total, progress, onView }) {
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
-    if (prefersReducedMotion() || isCoarsePointer()) {
+    if (prefersReducedMotion() || isCoarsePointer() || staticScale) {
       imgProgress.set(1);
       return;
     }
@@ -110,7 +110,7 @@ function StackingCard({ i, project, total, progress, onView }) {
     <div ref={wrapRef} className={cn('stack-card-wrap')}>
       <motion.div
         className="project-card"
-        style={{ scale, '--stack-i': i }}
+        style={staticScale ? { '--stack-i': i } : { scale, '--stack-i': i }}
       >
         {/* Info column */}
         <div className="project-card-info">
@@ -205,14 +205,19 @@ export default function ProjectsStacking({ projects = [], onView }) {
   const containerRef = useRef(null);
   const progress = useMotionValue(0);
 
+  // Touch phones: sticky + per-frame scale on ~9 full-viewport cards is
+  // the main mobile jank source. Pin scale to 1 (stack still works via
+  // sticky) and skip root measurement entirely.
+  const staticScale = isCoarsePointer();
+
   // Section-local progress — equivalent of the reference's
-  // useScroll({ target: container, offset: ['start start', 'end end'] }):
+  // useScroll({ target: container, offset: ['start start','end end'] }):
   // 0 when the container top hits the viewport top,
   // 1 when the container bottom hits the viewport bottom.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    if (prefersReducedMotion()) return;
+    if (prefersReducedMotion() || staticScale) return;
     let rafId = null;
     const update = () => {
       rafId = null;
@@ -238,7 +243,7 @@ export default function ProjectsStacking({ projects = [], onView }) {
       window.removeEventListener('resize', schedule);
       if (rafId != null) cancelAnimationFrame(rafId);
     };
-  }, [progress, projects.length]);
+  }, [progress, projects.length, staticScale]);
 
   return (
     <div ref={containerRef} className="projects-stack-scroll">
@@ -250,6 +255,7 @@ export default function ProjectsStacking({ projects = [], onView }) {
           total={projects.length}
           progress={progress}
           onView={onView}
+          staticScale={staticScale}
         />
       ))}
     </div>

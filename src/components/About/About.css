@@ -1056,6 +1056,21 @@
     overflow-x: clip;
   }
 
+  /* Decorative full-height backgrounds + animated dots repaint every
+     scroll frame under the sticky mobile chapter nav. */
+  .about-bg-grid,
+  .about-bg-dots,
+  .about-orange-thread,
+  .about-orange-dots {
+    display: none;
+  }
+
+  .about-chapter {
+    /* Skip paint/layout for off-screen chapters while scrolling. */
+    content-visibility: auto;
+    contain-intrinsic-size: auto 640px;
+  }
+
   .about-grid {
     grid-template-columns: 1fr;
     padding: 0 24px;
