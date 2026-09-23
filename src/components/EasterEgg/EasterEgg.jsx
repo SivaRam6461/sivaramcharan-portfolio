@@ -16,7 +16,7 @@ const KONAMI_SEQUENCE = [
   'b', 'a',
 ];
 
-const CONFETTI_COLORS = ['var(--cyan)', 'var(--purple)', 'var(--pink)', 'var(--green)'];
+const CONFETTI_COLORS = ['#ff5722', '#ff8c00', '#ffca28', '#ffffff'];
 const CONFETTI_COUNT = 60;
 
 function Confetti() {

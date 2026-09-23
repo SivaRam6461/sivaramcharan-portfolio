@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import './BackToTop.css';
+import { scrollToTop } from '../../utils/scroll';
 
 const SHOW_AFTER_PX = 500;
 
@@ -20,15 +20,11 @@ export default function BackToTop() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   return (
     <AnimatePresence>
       {visible && (
         <motion.button
-          className="back-to-top"
+          className="fixed right-6 bottom-6 z-[90] w-[46px] h-[46px] rounded-full bg-[#12141c]/90 border border-white/15 backdrop-blur-xl flex items-center justify-center text-white hover:text-orange-400 hover:border-orange-500/50 transition-colors shadow-2xl"
           onClick={scrollToTop}
           aria-label="Back to top"
           initial={{ opacity: 0, y: 16, scale: 0.8 }}

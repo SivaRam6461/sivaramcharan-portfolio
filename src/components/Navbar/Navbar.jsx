@@ -1,136 +1,249 @@
-/* ============================================================
-   components/Navbar/Navbar.jsx
-   Sticky top navbar with:
-   - Active link tracking on scroll
-   - Dark/light theme toggle
-   - Mobile hamburger menu
-   - Resume download button
-   ============================================================ */
-
 import { useState, useEffect } from 'react';
-import { useTheme } from '../../context/ThemeContext';
-import { personalInfo, testimonials } from '../../data/portfolioData';
-import './Navbar.css';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Menu, X, ArrowRight } from 'lucide-react';
+import { scrollToId, scrollToTop } from '../../utils/scroll';
 
-// Navigation items — label shown, id is the section to scroll to.
-// "Reviews" only appears once real testimonials exist in portfolioData.js.
 const NAV_ITEMS = [
-  { label: 'About',      id: 'about' },
-  { label: 'Skills',     id: 'skills' },
-  { label: 'Projects',   id: 'projects' },
-  { label: 'GitHub',     id: 'github' },
-  { label: 'Experience', id: 'experience' },
-  ...(testimonials.length > 0 ? [{ label: 'Reviews', id: 'testimonials' }] : []),
-  { label: 'Contact',    id: 'contact' },
+  { id: 'hero', label: 'Home' },
+  { id: 'about', label: 'About' },
+  { id: 'projects', label: 'Projects' },
+  { id: 'skills', label: 'Skills' },
+  { id: 'experience', label: 'Experience' },
+  { id: 'contact', label: 'Contact' },
 ];
 
-export default function Navbar() {
-  const { isDark, toggleTheme } = useTheme();
-  const [scrolled, setScrolled]   = useState(false);  // frosted glass effect
-  const [menuOpen, setMenuOpen]   = useState(false);  // mobile menu
-  const [activeId, setActiveId]   = useState('');     // highlighted link
+export default function Navbar({ onOpenCmd }) {
+  const [activeSection, setActiveSection] = useState('hero');
+  const [isOverHero, setIsOverHero] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Add/remove .scrolled class based on scroll position
   useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > 60);
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
 
-      // Find which section is currently in view
-      const sections = document.querySelectorAll('section[id]');
-      let current = '';
-      sections.forEach((s) => {
-        if (window.scrollY >= s.offsetTop - 120) current = s.id;
-      });
-      setActiveId(current);
+      // Light (warm-white) theme while the navbar overlaps any light
+      // section — Hero through Projects (incl. About/Skills). Goes
+      // dark once past the Projects section (GithubStats onwards).
+      const projectsSec = document.getElementById('projects');
+      const lightEnd = projectsSec
+        ? projectsSec.offsetTop + projectsSec.offsetHeight
+        : window.innerHeight;
+      setIsOverHero(scrollY + 64 < lightEnd); // 64 = navbar height
+
+      const sections = NAV_ITEMS.map((item) => document.getElementById(item.id));
+      const scrollPos = scrollY + 250;
+
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const sec = sections[i];
+        if (sec && sec.offsetTop <= scrollPos) {
+          setActiveSection(NAV_ITEMS[i].id);
+          break;
+        }
+      }
     };
 
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
   }, []);
 
-  // Smooth scroll to section when nav link clicked
-  const scrollTo = (id) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-    setMenuOpen(false); // close mobile menu
+  const handleNavClick = (id) => {
+    setMobileMenuOpen(false);
+    if (id === 'hero') {
+      scrollToTop();
+    } else {
+      scrollToId(id);
+    }
   };
 
+  const lightTheme = isOverHero;
+
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      const handleKeyDown = (e) => {
+        if (e.key === 'Escape') setMobileMenuOpen(false);
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.body.style.overflow = '';
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+    document.body.style.overflow = '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileMenuOpen]);
+
   return (
-    <>
-      <nav id="navbar" className={scrolled ? 'scrolled' : ''}>
-        {/* Logo */}
-        <a href="#hero" className="nav-logo gradient-text"
-           onClick={(e) => { e.preventDefault(); scrollTo('hero'); }}>
-          {personalInfo.initials}
+    <motion.header
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-500 ${
+        lightTheme ? 'bg-[#faf9f7]/80 backdrop-blur-md' : 'bg-[#0b0c10]/80 backdrop-blur-md'
+      }`}
+    >
+      <div className="max-w-[1440px] mx-auto px-6 md:px-10 flex items-center justify-between h-16">
+        {/* LEFT: Logo */}
+        <a
+          href="#hero"
+          onClick={(e) => {
+            e.preventDefault();
+            scrollToTop();
+          }}
+          className="flex items-center gap-1 group focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/50 rounded py-2 px-1 min-h-[44px]"
+          aria-label="Sivaram Charan - Back to top"
+        >
+          <span
+            className={`font-grotesk text-[18px] font-bold tracking-tight transition-colors ${
+              lightTheme ? 'text-[#1a1a1a]' : 'text-white'
+            }`}
+          >
+            Sivaram Charan
+          </span>
+          <span className="w-2 h-2 rounded-full bg-[var(--orange-hero,#FF4F12)] mt-0.5" />
         </a>
 
-        {/* Desktop navigation links */}
-        <ul className="nav-links">
-          {NAV_ITEMS.map((item) => (
-            <li key={item.id}>
-              <a
-                href={`#${item.id}`}
-                onClick={(e) => { e.preventDefault(); scrollTo(item.id); }}
-                className={activeId === item.id ? 'active' : ''}
-                aria-current={activeId === item.id ? 'true' : undefined}
+        {/* CENTER: Navigation Links */}
+        <nav className="hidden lg:flex items-center gap-8" aria-label="Main Navigation">
+          {NAV_ITEMS.map((item) => {
+            const isActive = activeSection === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item.id)}
+                className={`relative font-grotesk text-[13px] font-medium transition-colors duration-200 focus:outline-none focus-visible:text-orange-500 pb-1 ${
+                  isActive
+                    ? lightTheme
+                      ? 'text-[#1a1a1a]'
+                      : 'text-white'
+                    : lightTheme
+                      ? 'text-[#666] hover:text-[#1a1a1a]'
+                      : 'text-[#999] hover:text-white'
+                }`}
               >
                 {item.label}
-              </a>
-            </li>
-          ))}
-        </ul>
+                {isActive && (
+                  <motion.span
+                    layoutId="navUnderline"
+                    className="absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--orange-hero,#FF4F12)] rounded-full"
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </nav>
 
-        {/* Right side controls */}
-        <div className="nav-right">
-          {/* Command palette trigger — Ctrl/Cmd+K also opens it globally */}
-          <button
-            className="cmdk-trigger"
-            onClick={() => window.dispatchEvent(new Event('toggle-command-palette'))}
-            aria-label="Open command palette"
-            title="Command palette (Ctrl+K)"
+        {/* RIGHT: CTA */}
+        <div className="flex items-center gap-3">
+          <a
+            href="#contact"
+            onClick={(e) => {
+              e.preventDefault();
+              scrollToId('contact');
+            }}
+            className={`hidden md:inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[13px] font-grotesk font-semibold transition-all duration-300 ${
+              lightTheme
+                ? 'bg-[#1a1a1a] text-white hover:bg-[#333]'
+                : 'bg-white text-[#0b0c10] hover:bg-gray-200'
+            }`}
           >
-            <kbd>{navigator.platform?.includes('Mac') ? '⌘' : 'Ctrl'}</kbd><kbd>K</kbd>
-          </button>
-
-          {/* Theme toggle — sun in dark mode, moon in light mode */}
-          <button
-            className="theme-btn"
-            onClick={toggleTheme}
-            title="Toggle theme"
-            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            <span aria-hidden="true">{isDark ? '☀️' : '🌙'}</span>
-          </button>
-
-          {/* Resume download — hidden on mobile via CSS */}
-          <a href={personalInfo.resumeUrl} download className="btn-primary"
-             style={{ padding: '9px 20px', fontSize: '0.82rem' }}>
-            Resume ↓
+            <span>Let's Talk</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </a>
 
-          {/* Mobile hamburger button */}
-          <button
-            className={`hamburger ${menuOpen ? 'open' : ''}`}
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Toggle menu"
+          {/* Mobile Let's Talk */}
+          <a
+            href="#contact"
+            onClick={(e) => {
+              e.preventDefault();
+              scrollToId('contact');
+            }}
+            className={`md:hidden inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-grotesk font-semibold transition-all duration-300 ${
+              lightTheme
+                ? 'bg-[#1a1a1a] text-white hover:bg-[#333]'
+                : 'bg-white text-[#0b0c10] hover:bg-gray-200'
+            }`}
           >
-            <span /><span /><span />
+            <span>Let's Talk</span>
+            <ArrowRight className="w-3 h-3" />
+          </a>
+
+          {/* Mobile Hamburger */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className={`lg:hidden p-2 rounded-lg transition-colors ${
+              lightTheme
+                ? 'text-[#1a1a1a] hover:bg-black/5'
+                : 'text-white hover:bg-white/10'
+            }`}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
-      </nav>
+      </div>
 
-      {/* Mobile dropdown menu */}
-      <ul className={`mobile-menu ${menuOpen ? 'open' : ''}`}>
-        {NAV_ITEMS.map((item) => (
-          <li key={item.id}>
-            <a href={`#${item.id}`} onClick={(e) => { e.preventDefault(); scrollTo(item.id); }}>
-              {item.label}
-            </a>
-          </li>
-        ))}
-        <li>
-          <a href={personalInfo.resumeUrl} download>Download Resume ↓</a>
-        </li>
-      </ul>
-    </>
+      {/* MOBILE MENU */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className={`lg:hidden absolute top-16 left-4 right-4 rounded-2xl p-5 shadow-xl z-50 ${
+              lightTheme
+                ? 'bg-white border border-gray-100'
+                : 'bg-[#1a1d29] border border-white/10'
+            }`}
+          >
+            <div className="flex flex-col gap-1">
+              {NAV_ITEMS.map((item) => {
+                const isActive = activeSection === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => handleNavClick(item.id)}
+                    className={`w-full text-left px-4 py-3 rounded-xl font-grotesk text-[15px] font-medium transition-colors ${
+                      isActive
+                        ? lightTheme
+                          ? 'bg-orange-50 text-[var(--orange-hero,#FF4F12)]'
+                          : 'bg-white/10 text-orange-400'
+                        : lightTheme
+                          ? 'text-[#555] hover:bg-gray-50 hover:text-[#1a1a1a]'
+                          : 'text-[#999] hover:bg-white/5 hover:text-white'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className={`mt-4 pt-4 border-t ${lightTheme ? 'border-gray-100' : 'border-white/10'}`}>
+              <a
+                href="#contact"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setMobileMenuOpen(false);
+                  scrollToId('contact');
+                }}
+                className="w-full py-3 rounded-xl bg-[#1a1a1a] text-center font-grotesk text-[14px] font-semibold text-white flex items-center justify-center gap-2"
+              >
+                <span>Let's Talk</span>
+                <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.header>
   );
 }

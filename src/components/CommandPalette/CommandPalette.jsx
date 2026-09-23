@@ -1,199 +1,227 @@
 /* ============================================================
-   components/CommandPalette/CommandPalette.jsx
-   Ctrl/Cmd+K opens a searchable list of quick actions — jump to
-   a section, toggle theme, open socials, copy email, download
-   resume. Esc closes it; arrow keys + Enter navigate/execute.
+   src/components/CommandPalette/CommandPalette.jsx
+   Global Command Palette in Orange & White Theme
+   Keyboard accessible: ↑↓ navigate, Enter select, Esc close.
    ============================================================ */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { useTheme } from '../../context/ThemeContext';
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, ArrowRight, User, Code2, FolderGit2, Briefcase, Mail, Volume2, Download, ExternalLink, X } from 'lucide-react';
 import { personalInfo } from '../../data/portfolioData';
-import './CommandPalette.css';
+import { playSound, toggleMute } from '../../utils/audio';
+import { scrollToId } from '../../utils/scroll';
 
-const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+const COMMAND_ITEMS = [
+  {
+    category: 'Navigation',
+    items: [
+      { id: 'about', label: 'Go to About Section', icon: User, action: (close) => { scrollToId('about'); close(); } },
+      { id: 'skills', label: 'Go to Skills Matrix', icon: Code2, action: (close) => { scrollToId('skills'); close(); } },
+      { id: 'projects', label: 'Go to Case Studies', icon: FolderGit2, action: (close) => { scrollToId('projects'); close(); } },
+      { id: 'experience', label: 'Go to Experience & Education', icon: Briefcase, action: (close) => { scrollToId('experience'); close(); } },
+      { id: 'contact', label: 'Go to Contact Portal', icon: Mail, action: (close) => { scrollToId('contact'); close(); } },
+    ],
+  },
+  {
+    category: 'Actions & Social',
+    items: [
+      { id: 'resume', label: 'Download Resume PDF', icon: Download, action: () => window.open(personalInfo.resumeUrl, '_blank', 'noopener,noreferrer') },
+      { id: 'github', label: 'Open GitHub Profile', icon: ExternalLink, action: () => window.open(personalInfo.github, '_blank', 'noopener,noreferrer') },
+      { id: 'linkedin', label: 'Open LinkedIn Profile', icon: ExternalLink, action: () => window.open(personalInfo.linkedin, '_blank', 'noopener,noreferrer') },
+      { id: 'sound', label: 'Toggle UI Audio Mute', icon: Volume2, action: () => toggleMute() },
+    ],
+  },
+];
 
-export default function CommandPalette() {
-  const { isDark, toggleTheme } = useTheme();
-  const [open, setOpen] = useState(false);
+export default function CommandPalette({ isOpen, onClose, onOpen }) {
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
-  const inputRef = useRef(null);
-  const triggerElRef = useRef(null);
+  const dialogRef = useRef(null);
+  // Ref always holds the latest flattened results, so the keydown handler
+  // can read current navigation state without re-subscribing.
+  const flatItemsRef = useRef([]);
 
-  const commands = useMemo(() => [
-    { id: 'home', label: 'Go to Home', keywords: 'hero top', action: () => scrollTo('hero') },
-    { id: 'about', label: 'Go to About', keywords: 'bio', action: () => scrollTo('about') },
-    { id: 'skills', label: 'Go to Skills', keywords: 'tech stack', action: () => scrollTo('skills') },
-    { id: 'projects', label: 'Go to Projects', keywords: 'work portfolio', action: () => scrollTo('projects') },
-    { id: 'github-section', label: 'Go to GitHub Activity', keywords: 'stats contributions', action: () => scrollTo('github') },
-    { id: 'experience', label: 'Go to Experience', keywords: 'journey timeline education', action: () => scrollTo('experience') },
-    { id: 'contact', label: 'Go to Contact', keywords: 'form message', action: () => scrollTo('contact') },
-    {
-      id: 'theme',
-      label: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
-      keywords: 'theme dark light toggle',
-      action: toggleTheme,
-    },
-    {
-      id: 'resume',
-      label: 'Download Resume',
-      keywords: 'cv pdf',
-      action: () => {
-        const a = document.createElement('a');
-        a.href = personalInfo.resumeUrl;
-        a.download = '';
-        a.click();
-      },
-    },
-    {
-      id: 'github-profile',
-      label: 'Open GitHub Profile',
-      keywords: 'code repos',
-      action: () => window.open(personalInfo.github, '_blank', 'noopener'),
-    },
-    {
-      id: 'linkedin',
-      label: 'Open LinkedIn Profile',
-      keywords: 'career network',
-      action: () => window.open(personalInfo.linkedin, '_blank', 'noopener'),
-    },
-    {
-      id: 'copy-email',
-      label: `Copy Email (${personalInfo.email})`,
-      keywords: 'contact mail address',
-      action: () => navigator.clipboard?.writeText(personalInfo.email),
-    },
-  ], [isDark, toggleTheme]);
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return commands;
-    return commands.filter((c) =>
-      c.label.toLowerCase().includes(q) || c.keywords.toLowerCase().includes(q)
-    );
-  }, [commands, query]);
-
-  const closePalette = () => {
-    setOpen(false);
-    setQuery('');
-    setActiveIndex(0);
-    triggerElRef.current?.focus();
-  };
-
-  const runCommand = (cmd) => {
-    if (!cmd) return;
-    cmd.action();
-    closePalette();
-  };
-
-  /* Global Ctrl/Cmd+K to open, Esc to close */
+  // Reset the active row whenever the query or open-state changes.
   useEffect(() => {
-    const onKeyDown = (e) => {
-      const isK = e.key?.toLowerCase() === 'k';   // e.key can be undefined for autofill events
-      if ((e.metaKey || e.ctrlKey) && isK) {
+    if (isOpen) setActiveIndex(0);
+  }, [query, isOpen]);
+
+  // Keep Tab focus inside the dialog while open (modal focus trap).
+  useEffect(() => {
+    if (!isOpen || !dialogRef.current) return;
+    const dialog = dialogRef.current;
+    const focusables = () =>
+      [...dialog.querySelectorAll('button, [href], input, [tabindex]:not([tabindex="-1"])')]
+        .filter((el) => !el.hasAttribute('disabled'));
+    const handler = (e) => {
+      if (e.key !== 'Tab') return;
+      const list = focusables();
+      if (!list.length) return;
+      const first = list[0];
+      const last = list[list.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey && (active === first || !dialog.contains(active))) {
         e.preventDefault();
-        triggerElRef.current = document.activeElement;
-        setOpen((prev) => !prev);
-      } else if (e.key === 'Escape' && open) {
-        closePalette();
+        last.focus();
+      } else if (!e.shiftKey && (active === last || !dialog.contains(active))) {
+        e.preventDefault();
+        first.focus();
       }
     };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [open]);
+    dialog.addEventListener('keydown', handler);
+    return () => dialog.removeEventListener('keydown', handler);
+  }, [isOpen]);
 
-  /* Also open via a visible navbar button (custom event keeps this decoupled) */
   useEffect(() => {
-    const onExternalToggle = () => {
-      triggerElRef.current = document.activeElement;
-      setOpen((prev) => !prev);
+    const handleKeyDown = (e) => {
+      const items = flatItemsRef.current;
+
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        playSound('open');
+        if (isOpen) onClose();
+        else if (onOpen) onOpen();
+        return;
+      }
+      if (!isOpen) return;
+
+      if (e.key === 'Escape') {
+        onClose();
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActiveIndex((i) => (items.length ? (i + 1) % items.length : 0));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActiveIndex((i) => (items.length ? (i - 1 + items.length) % items.length : 0));
+      } else if (e.key === 'Enter') {
+        const item = items[activeIndex];
+        if (item) {
+          e.preventDefault();
+          playSound('click');
+          item.action(onClose);
+        }
+      }
     };
-    window.addEventListener('toggle-command-palette', onExternalToggle);
-    return () => window.removeEventListener('toggle-command-palette', onExternalToggle);
-  }, []);
 
-  /* Focus search input on open, reset selection when results change */
-  useEffect(() => {
-    if (open) inputRef.current?.focus();
-  }, [open]);
-  useEffect(() => { setActiveIndex(0); }, [query]);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose, onOpen, activeIndex]);
 
-  const onListKeyDown = (e) => {
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setActiveIndex((i) => Math.min(i + 1, filtered.length - 1));
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setActiveIndex((i) => Math.max(i - 1, 0));
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      runCommand(filtered[activeIndex]);
-    }
+  if (!isOpen) return null;
+
+  const run = (item) => {
+    playSound('click');
+    item.action(onClose);
   };
+
+  const filteredCommands = COMMAND_ITEMS.map((cat) => ({
+    ...cat,
+    items: cat.items.filter((item) => item.label.toLowerCase().includes(query.toLowerCase())),
+  })).filter((cat) => cat.items.length > 0);
+
+  const flatItems = filteredCommands.flatMap((c) => c.items);
+  flatItemsRef.current = flatItems;
+
+  // Running index across categories so ↑↓ maps to a single flat list.
+  let flatIdx = -1;
 
   return (
     <AnimatePresence>
-      {open && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[999] flex items-start justify-center pt-20 px-4 bg-black/85 backdrop-blur-md"
+        onClick={onClose}
+      >
         <motion.div
-          className="cmdk-overlay"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
-          onClick={closePalette}
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Command palette"
+          initial={{ scale: 0.95, y: -20 }}
+          animate={{ scale: 1, y: 0 }}
+          exit={{ scale: 0.95, y: -20 }}
+          onClick={(e) => e.stopPropagation()}
+          className="w-full max-w-xl bg-[#12141c] border border-white/20 rounded-3xl p-4 shadow-2xl overflow-hidden space-y-4"
         >
-          <motion.div
-            className="cmdk-panel"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Command palette"
-            initial={{ opacity: 0, y: -16, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -16, scale: 0.97 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="cmdk-input-row">
-              <span className="cmdk-input-icon" aria-hidden="true">⌘</span>
-              <input
-                ref={inputRef}
-                type="text"
-                className="cmdk-input"
-                placeholder="Type a command or search…"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={onListKeyDown}
-                aria-label="Search commands"
-                aria-activedescendant={filtered[activeIndex] ? `cmdk-item-${filtered[activeIndex].id}` : undefined}
-                role="combobox"
-                aria-expanded="true"
-                aria-controls="cmdk-list"
-              />
-              <kbd className="cmdk-esc">Esc</kbd>
-            </div>
+          {/* Input Header */}
+          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/[0.06] border border-white/15">
+            <Search className="w-5 h-5 text-orange-400 shrink-0" />
+            <input
+              type="text"
+              autoFocus
+              placeholder="Type a command or section..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label="Search commands"
+              className="w-full bg-transparent font-body text-sm text-white outline-none placeholder:text-slate-400"
+            />
+            <button
+              onClick={onClose}
+              aria-label="Close command palette"
+              className="p-1 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-slate-300 hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
 
-            <ul className="cmdk-list" id="cmdk-list" role="listbox">
-              {filtered.length === 0 && (
-                <li className="cmdk-empty">No matching commands</li>
-              )}
-              {filtered.map((cmd, i) => (
-                <li
-                  key={cmd.id}
-                  id={`cmdk-item-${cmd.id}`}
-                  role="option"
-                  aria-selected={i === activeIndex}
-                  className={`cmdk-item ${i === activeIndex ? 'active' : ''}`}
-                  onMouseEnter={() => setActiveIndex(i)}
-                  onClick={() => runCommand(cmd)}
-                >
-                  {cmd.label}
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+          {/* Results List */}
+          <div role="listbox" aria-label="Commands" className="max-h-80 overflow-y-auto space-y-4 px-2">
+            {filteredCommands.map((cat, i) => (
+              <div key={i} className="space-y-2">
+                <span className="font-mono text-[10px] text-orange-400 uppercase tracking-widest px-2 font-bold">
+                  {cat.category}
+                </span>
+                <div className="space-y-1">
+                  {cat.items.map((item) => {
+                    flatIdx += 1;
+                    const isActive = flatIdx === activeIndex;
+                    const IconComp = item.icon;
+                    return (
+                      <button
+                        key={item.id}
+                        role="option"
+                        aria-selected={isActive}
+                        ref={(el) => {
+                          if (isActive && el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
+                        }}
+                        onClick={() => run(item)}
+                        onMouseEnter={() => setActiveIndex(flatIdx)}
+                        className={`w-full flex items-center justify-between p-3 rounded-xl text-left transition-all group border ${
+                          isActive
+                            ? 'bg-orange-500/20 border-orange-500/50'
+                            : 'border-transparent hover:bg-orange-500/10 hover:border-orange-500/40'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <IconComp className="w-4 h-4 text-orange-400 group-hover:scale-110 transition-transform" />
+                          <span className={`font-mono text-xs font-semibold ${isActive ? 'text-orange-300' : 'text-white group-hover:text-orange-300'}`}>
+                            {item.label}
+                          </span>
+                        </div>
+                        <ArrowRight className={`w-4 h-4 transition-all ${isActive ? 'text-orange-400 translate-x-1' : 'text-slate-400 group-hover:text-orange-400 group-hover:translate-x-1'}`} />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+
+            {flatItems.length === 0 && (
+              <p className="font-mono text-xs text-slate-400 text-center py-6">
+                No matching commands.
+              </p>
+            )}
+          </div>
+
+          {/* Footer Shortcuts hint */}
+          <div className="pt-3 border-t border-white/15 flex items-center justify-between text-[11px] font-mono text-slate-400 px-2">
+            <span>Use ↑↓ to navigate · Enter to select</span>
+            <span>ESC to close</span>
+          </div>
         </motion.div>
-      )}
+      </motion.div>
     </AnimatePresence>
   );
 }

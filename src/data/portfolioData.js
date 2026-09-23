@@ -1,292 +1,379 @@
 /* ============================================================
-   data/portfolioData.js  —  All content in one place.
-   Edit this file to update your portfolio without touching components.
+   src/data/portfolioData.js
+   Centralized data store for Sivaram Charan's portfolio.
    ============================================================ */
 
-// ── Personal / contact info
 export const personalInfo = {
   name: 'Sivaram Charan',
+  shortName: 'Sivaram',
   initials: 'SRC',
-  role: 'Full Stack Developer',
-  tagline: 'I build fast, modern, and scalable web experiences with the MERN stack — from pixel-perfect UIs to robust backend APIs.',
+  title: 'Full Stack AI Developer',
+  subtitle: 'Building AI-powered products, automation systems, SaaS platforms, and modern web & mobile experiences.',
+  tagline: 'Full Stack AI Developer focused on AI × Automation × SaaS — turning product ideas into production-ready web and mobile software.',
+  bio: `I am a Full Stack AI Developer and product engineer. I build AI-powered features, automation workflows, and full-stack digital products — from interface and API design through data and deployment — with hands-on internship experience and a background in Computer Science & AI.`,
   email: 'sivaramcharan55@gmail.com',
-  github: 'https://github.com/SivaRam6461',   // ← UPDATE THIS
-  linkedin: 'https://www.linkedin.com/in/siva-ram-charan-934590317/', // ← UPDATE THIS
-  location: 'India',
+  github: 'https://github.com/SivaRam6461',
+  linkedin: 'https://www.linkedin.com/in/siva-ram-charan-934590317/',
+  location: 'India (IST)',
+  timezone: 'Asia/Kolkata',
   available: true,
-  resumeUrl: '/Sivaram_FullStackDeveloper_resume.pdf',               // put resume.pdf in /public folder
+  statusText: 'Available for Full-time Roles & High-Impact Products',
+  resumeUrl: '/Sivaram_SoftwareEngineer.pdf',
 };
 
-// ── About me stats shown in the about section
 export const stats = [
-  { value: '9+', label: 'Projects Built' },
-  { value: '2',  label: 'Internships' },
-  { value: '10+', label: 'Technologies' },
-  { value: '∞',  label: 'Cups of Coffee' },
+  { value: '9+', label: 'Production Projects', icon: 'Code2' },
+  { value: '2', label: 'Engineering Internships', icon: 'Briefcase' },
+  { value: '15+', label: 'Technologies Mastered', icon: 'Cpu' },
+  { value: '100%', label: 'Commitment to Quality', icon: 'CheckCircle2' },
 ];
 
-// ── About me tags (chips shown below bio)
-export const aboutTags = [
-  '📍 India',
-  '🎓 B.Tech AI',
-  '💼 Open to Work',
-  '⚡ MERN Stack',
-  '🚀 Full Stack',
+export const heroRoles = [
+  'Full Stack AI Developer',
+  'AI & Automation Builder',
+  'SaaS Product Engineer',
+  'Web & Mobile Product Developer',
 ];
 
-// ── Skill categories
-export const skills = [
+export const skillsCategory = [
   {
-    id: 1,
-    icon: '🎨',
-    category: 'Frontend',
-    items: ['HTML5', 'CSS3', 'JavaScript', 'React.js','Next.js', 'Tailwind CSS','Framer Motion', 'GSAP animations','Swiper.js for sliders' ],
+    id: 'frontend',
+    title: 'Frontend Craft',
+    description: 'Building responsive, animated product interfaces',
+    skills: [
+      { name: 'React.js', level: 92, icon: 'Atom' },
+      { name: 'Next.js', level: 85, icon: 'Zap' },
+      { name: 'JavaScript (ES6+)', level: 90, icon: 'FileCode' },
+      { name: 'TypeScript', level: 84, icon: 'FileCode' },
+      { name: 'Tailwind CSS', level: 94, icon: 'Palette' },
+      { name: 'Framer Motion', level: 88, icon: 'Sparkles' },
+    ]
   },
   {
-    id: 2,
-    icon: '⚙️',
-    category: 'Backend',
-    items: ['Node.js', 'Express.js', 'REST APIs', 'JWT Auth'],
+    id: 'backend',
+    title: 'Backend & APIs',
+    description: 'Product backends, REST services, and auth',
+    skills: [
+      { name: 'Node.js', level: 88, icon: 'Server' },
+      { name: 'Express.js', level: 90, icon: 'Workflow' },
+      { name: 'RESTful API Design', level: 92, icon: 'Layers' },
+      { name: 'Authentication & RBAC', level: 88, icon: 'ShieldCheck' },
+      { name: 'MongoDB & Mongoose', level: 86, icon: 'Database' },
+      { name: 'Git & GitHub', level: 90, icon: 'GitBranch' },
+    ]
   },
   {
-    id: 3,
-    icon: '🗄️',
-    category: 'Database',
-    items: ['MongoDB', 'Mongoose', 'Firebase'],
+    id: 'data',
+    title: 'Data & Cloud',
+    description: 'Data layers and delivery tooling',
+    skills: [
+      { name: 'MongoDB', level: 88, icon: 'Database' },
+      { name: 'Git & GitHub', level: 90, icon: 'GitBranch' },
+      { name: 'Vercel / Deployment', level: 90, icon: 'Globe' },
+      { name: 'Cloudinary CDN', level: 85, icon: 'Cloud' },
+    ]
   },
   {
-    id: 4,
-    icon: '🛠️',
-    category: 'Tools & DevOps',
-    items: ['Git', 'GitHub', 'VS Code', 'Postman','Cloudinary','Google Maps API','Vercel'],
-  },
+    id: 'ai',
+    title: 'AI & Automation',
+    description: 'AI product features and connected workflows',
+    skills: [
+      { name: 'AI / LLM Integration', level: 80, icon: 'Brain' },
+      { name: 'Workflow Automation', level: 78, icon: 'Workflow' },
+      { name: 'Python', level: 82, icon: 'Terminal' },
+      { name: 'AI-Assisted Engineering', level: 80, icon: 'Sparkles' },
+    ]
+  }
 ];
 
-// ── Projects  (add more objects here to add projects)
 export const projects = [
   {
+    id: 8,
+    title: 'Beauté — Luxury Beauty & Skincare Experience',
+    slug: 'beaute-skincare',
+    subtitle: 'Premium beauty storefront with elegant product discovery and polished shopping flows',
+    description: 'A premium beauty and skincare storefront focused on elegant product discovery, refined visuals, and a polished shopping experience.',
+    category: 'Web',
+    tags: ['Web'],
+    productType: 'Web Experience',
+    featured: true,
+    liveUrl: null,
+    githubUrl: null,
+    gradient: 'from-rose-500 to-pink-600',
+    coverImage: '/images/new-projects/p1.png',
+    images: ['/images/new-projects/p1.png'],
+    tech: ['Next.js', 'TypeScript', 'Tailwind CSS', 'Framer Motion'],
+    role: 'Frontend & Motion Developer',
+    challenge: 'Present a luxury beauty catalog with refined hierarchy and calm motion so product discovery feels premium rather than cluttered.',
+    solution: 'Built a Next.js + TypeScript storefront with Tailwind design tokens and Framer Motion transitions for product cards, reveals, and micro-interactions.',
+    keyFeatures: [
+      'Elegant product discovery and catalog layouts',
+      'Refined visual system for beauty & skincare',
+      'Polished shopping-oriented UX flows',
+      'Motion-led page and card interactions',
+    ],
+  },
+  {
+    id: 9,
+    title: 'Srcuxs — Digital Agency Experience',
+    slug: 'srcuxs-agency',
+    subtitle: 'Bold agency site with immersive visuals, modern motion, and conversion-focused CTAs',
+    description: 'A bold digital agency website with immersive visuals, modern motion, and a conversion-focused experience for showcasing creative services and work.',
+    category: 'Web',
+    tags: ['Web'],
+    productType: 'Web Experience',
+    featured: true,
+    liveUrl: null,
+    githubUrl: null,
+    gradient: 'from-violet-500 to-indigo-600',
+    coverImage: '/images/new-projects/p2.png',
+    images: ['/images/new-projects/p2.png'],
+    tech: ['Next.js', 'TypeScript', 'Tailwind CSS', 'Framer Motion'],
+    role: 'Frontend & Motion Developer',
+    challenge: 'Showcase creative services and case work with bold visuals while keeping clear paths to inquiry and conversion.',
+    solution: 'Designed a high-impact agency experience in Next.js with TypeScript, Tailwind layouts, and Framer Motion section storytelling and CTAs.',
+    keyFeatures: [
+      'Immersive hero and service storytelling',
+      'Work showcase built for creative impact',
+      'Conversion-focused contact CTAs',
+      'Modern motion and scroll interactions',
+    ],
+  },
+  {
+    id: 10,
+    title: 'Indian Bakery & Café — Digital Café Experience',
+    slug: 'indian-bakery-cafe',
+    subtitle: 'Warm bakery site that builds local brand presence and drives visits or orders',
+    description: 'A warm, immersive bakery and café website designed to showcase signature products, build local brand presence, and guide customers toward ordering or visiting.',
+    category: 'Web',
+    tags: ['Web'],
+    productType: 'Web Experience',
+    featured: true,
+    liveUrl: null,
+    githubUrl: null,
+    gradient: 'from-amber-500 to-orange-600',
+    coverImage: '/images/new-projects/p3.png',
+    images: ['/images/new-projects/p3.png'],
+    tech: ['Next.js', 'TypeScript', 'Tailwind CSS', 'Framer Motion'],
+    role: 'Frontend & Motion Developer',
+    challenge: 'Make signature products feel appetizing online and move local visitors toward ordering or visiting the café.',
+    solution: 'Crafted a warm Next.js experience with TypeScript, Tailwind layouts, and Framer Motion product showcases that highlight menu highlights and visit CTAs.',
+    keyFeatures: [
+      'Signature product and menu showcases',
+      'Local brand presence storytelling',
+      'Order / visit-oriented CTAs',
+      'Warm, immersive bakery visual design',
+    ],
+  },
+  {
     id: 1,
-    title: 'Food Ordering Web App',
-    description:
-      'Full-stack MERN application for ordering food online. Features JWT authentication, menu browsing, cart management, order tracking, and an admin dashboard.',
-    tech: ['React.js', 'Node.js', 'Express.js', 'MongoDB', 'JWT'],
+    title: 'Online Food Ordering Platform',
+    slug: 'food-ordering-app',
+    subtitle: 'Full-stack product workflow — menu, cart, orders and admin in one web app',
+    description: 'Designed and built a full-stack food ordering product connecting the customer interface, backend services, and data layer. Covers menu discovery, cart state, authentication, order status, and admin menu operations.',
     category: 'Full Stack',
+    tags: ['Full Stack', 'Web'],
+    productType: 'Full Stack Product',
+    featured: true,
     liveUrl: null,
     githubUrl: 'https://github.com/SivaRam6461/Online-Food-Ordering-Web-Application',
-    featured: true,
-    gradient: 'linear-gradient(135deg, #0e7490, #1d4ed8)',
-    //emoji: '🍔',
-    //image: 'public/images/BD logo.jpg ',
+    gradient: 'from-cyan-500 to-blue-600',
+    coverImage: '/images/p2.1.webp',
     images: [
+      '/images/p2.1.webp',
+      '/images/p2.2.webp',
+      '/images/p2.3.webp',
+      '/images/p2.4.webp',
+      '/images/p2.5.webp',
       '/images/p2.12.webp',
-    '/images/p2.13.webp',
-    '/images/p2.1.webp',
-    '/images/p2.2.webp',
-    '/images/p2.3.webp',
-    '/images/p2.4.webp',
-    '/images/p2.5.webp',
-    '/images/p2.6.webp',
-    '/images/p2.7.webp',
-    '/images/p2.8.webp',
-    '/images/p2.9.webp',
-
-  ]
+    ],
+    tech: ['React.js', 'Node.js', 'Express.js', 'MongoDB', 'JWT Auth', 'Tailwind CSS'],
+    role: 'Lead Full Stack Developer',
+    challenge: 'Keep cart and order state consistent across the customer and admin experiences while protecting routes with authentication and role-based access.',
+    solution: 'Designed a modular REST API with Express middleware and clear data models in MongoDB, then wired the React client to those services for menu, cart, and order workflows.',
+    keyFeatures: [
+      'Authentication & protected user/admin routes',
+      'Menu browsing with filters and search',
+      'Cart sync and order status flow',
+      'Admin operations for menu management',
+    ]
   },
   {
     id: 2,
-    title: 'Ekam Infra — Construction Site',
-    description:
-      'Professional business website for a construction company. Responsive design, project showcase, service listings, and contact integration. Live on ekaminfra.in',
-    tech: ['HTML', 'CSS', 'JavaScript'],
-    category: 'Frontend',
+    title: 'Ekam Infra — Corporate Construction Portal',
+    slug: 'ekam-infra',
+    subtitle: 'Production web experience for a construction enterprise — live on client domain',
+    description: 'Official client website for Ekam Infra. Built as a fast, responsive web experience presenting architectural projects, services, gallery content, and inquiry capture. Live in production.',
+    category: 'Web',
+    tags: ['Web'],
+    productType: 'Web Experience',
+    featured: true,
     liveUrl: 'http://ekaminfra.in/',
     githubUrl: 'https://github.com/SivaRam6461/Construction_Web',
-    featured: true,
-     gradient: 'linear-gradient(135deg, #7c3aed, #db2777)',
-    //emoji: '🏗️',
-    //image: 'public/images/project1.jpg ',  
+    gradient: 'from-purple-500 to-pink-600',
+    coverImage: '/images/p1.webp',
     images: [
-    '/images/p1.webp',
-    '/images/p2.webp',
-    '/images/p3.webp',
-    '/images/p4.webp',
-    '/images/p5.webp',
-    '/images/p6.webp',
-
-  ]
+      '/images/p1.webp',
+      '/images/p2.webp',
+      '/images/p3.webp',
+      '/images/p4.webp',
+      '/images/p5.webp',
+      '/images/p6.webp',
+    ],
+    tech: ['HTML5', 'CSS3', 'JavaScript (ES6+)', 'Responsive Layouts', 'SEO Optimization'],
+    role: 'Frontend Developer',
+    challenge: 'Present heavy architectural media in a fast, responsive layout that still feels premium on mobile and desktop.',
+    solution: 'Built a responsive editorial layout with optimized asset loading, lazy media, and a grid system tuned for large project imagery.',
+    keyFeatures: [
+      'Live client production site (ekaminfra.in)',
+      'Architectural project showcase',
+      'Service listings and inquiry forms',
+      'Cross-browser responsive delivery',
+    ]
   },
-  // {
-  //   id: 3,
-  //   title: 'Crop Recommendation System',
-  //   description:
-  //     'A robust RESTful API with Express.js and MongoDB. Includes authentication middleware, full CRUD operations, request validation, and structured error handling.',
-  //   tech: ['Node.js', 'Express.js', 'MongoDB', 'JWT'],
-  //   category: 'Backend',
-  //   liveUrl: null,
-  //   githubUrl: null,
-  //   featured: false,
-  //   gradient: 'linear-gradient(135deg, #065f46, #0e7490)',
-  //  // emoji: '🔌',
-  //   //image: 'public/images/BD logo.jpg ',
-  //   images: [
-  //   '/images/BD logo.webp',
-  //   '/images/project1.webp',
-  //   '/images/BD logo.webp'
-  // ]
-  // },
   {
     id: 4,
-    title: 'Travel Planner Web App',
-    description:
-      'A full-stack travel planning web app built with the MERN stack that lets users discover destinations, save favorites, leave reviews, and create personalized trip itineraries.',
-    tech: ['React.js', 'Vite', 'Redux Toolkit',' Tailwind CSS', 'Node.js', 'Express.js', 'MongoDB','Mongoose', 'JWT','Cloudinary','Google Maps'],
+    title: 'Travel Itinerary & Explorer',
+    slug: 'travel-planner',
+    subtitle: 'Full-stack trip planning product with maps, media uploads and saved itineraries',
+    description: 'Designed and built a full-stack travel product: destination discovery, custom itineraries, review uploads, and bookmarks — connecting interface, API, and data layer end to end.',
     category: 'Full Stack',
+    tags: ['Full Stack', 'Web'],
+    productType: 'Full Stack Product',
+    featured: true,
     liveUrl: null,
     githubUrl: 'https://github.com/SivaRam6461/Travel-Planner',
-    featured: true,
-    gradient: 'linear-gradient(135deg, #0e7490, #1d4ed8)',
-    //emoji: '🍔',
-    //image: 'public/images/BD logo.jpg ',
+    gradient: 'from-emerald-500 to-cyan-600',
+    coverImage: '/images/p4.1.jpg',
     images: [
       '/images/p4.1.jpg',
-    '/images/p4.2.jpg',
-    '/images/p4.3.jpg',
-    '/images/p4.4.jpg',
-    '/images/p4.5.jpg',
-    '/images/p4.6.jpg',
-    '/images/p4.7.jpg',
-    '/images/p4.8.jpg',
-    '/images/p4.9.jpg',
-    '/images/p4.10.jpg',
-    '/images/p4.11.jpg',
-    '/images/p4.12.jpg',
-    '/images/p4.13.jpg',
-    '/images/p4.14.jpg',
-    '/images/p4.15.jpg',
-    '/images/p4.16.jpg',
-    '/images/p4.17.jpg',
-    '/images/p4.18.jpg',
-    '/images/p4.19.jpg',
-    '/images/p4.20.jpg',
-
-
-  ]
+      '/images/p4.2.jpg',
+      '/images/p4.3.jpg',
+      '/images/p4.4.jpg',
+      '/images/p4.5.jpg',
+      '/images/p4.8.jpg',
+    ],
+    tech: ['React.js', 'Redux Toolkit', 'Node.js', 'Express.js', 'MongoDB', 'Cloudinary', 'Google Maps API'],
+    role: 'Full Stack Developer',
+    challenge: 'Combine destination search, user-generated media, and map-driven discovery in a single product without muddying itinerary state.',
+    solution: 'Used Redux Toolkit for global trip state, Cloudinary for review media, and Google Maps for interactive location context on the React client backed by Express APIs.',
+    keyFeatures: [
+      'Destination discovery with map context',
+      'Cloud media uploads for reviews',
+      'Custom itineraries with shared state',
+      'User accounts and saved bookmarks',
+    ]
   },
   {
     id: 5,
-    title: 'GYM Web App',
-    description:
-      'A modern, animation-rich fitness website built with React and Next.js. Features smooth GSAP and Framer Motion animations, Swiper.js sliders, class and trainer showcases, and a fully responsive Tailwind CSS layout.',
-    tech: ['React.js', 'Vite', ' Tailwind CSS','Framer Motion',  'Next.js', 'GSAP animations','Swiper.js for sliders' ,'JavaScript (ES6)',],
-    category: 'Frontend',
+    title: 'HyperFit GYM & Fitness Web Application',
+    slug: 'gym-fitness',
+    subtitle: 'Motion-led web product for fitness brands — schedules, plans and kinetic scroll',
+    description: 'A high-energy fitness web product built for modern gyms: scroll-driven storytelling, class schedules, trainer showcases, and interactive plan presentation with production-grade motion.',
+    category: 'Web',
+    tags: ['Web'],
+    productType: 'Web Experience',
+    featured: true,
     liveUrl: null,
     githubUrl: 'https://github.com/SivaRam6461/Gym-Fitness-website',
-    featured: true,
-    gradient: 'linear-gradient(135deg, #0e7490, #1d4ed8)',
-    //emoji: '🍔',
-    //image: 'public/images/BD logo.jpg ',
+    gradient: 'from-orange-500 to-red-600',
+    coverImage: '/images/p5.1.png',
     images: [
-      '/images/p5.0.png',
       '/images/p5.1.png',
       '/images/p5.2.png',
       '/images/p5.3.png',
-      '/images/p5.4.png',
-      '/images/p5.5.png',
-      '/images/p5.6.png',
-      '/images/p5.7.png',
-      '/images/p5.8.png',
-      '/images/p5.9.png',
       '/images/p5.10.png',
       '/images/p5.12.png',
-      '/images/p5.13.png',
-      '/images/p5.14.png',
-      '/images/p5.15.png',
-      '/images/p5.16.png',
       '/images/p5.17.png',
-      '/images/p5.18.png',
-      '/images/p5.19.png',
-
-      '/images/p5.21.png',
-      '/images/p5.22.png',
-      '/images/p5.23.png',
-      '/images/p5.25.png',
-      '/images/p5.26.png',
-      '/images/p5.27.png',
-      '/images/p5.28.png',
-      '/images/p5.29.png',
-      '/images/p5.30.png',
-
-    
-
-
-  ]
+    ],
+    tech: ['React.js', 'Next.js', 'Tailwind CSS', 'Framer Motion', 'GSAP', 'Swiper.js'],
+    role: 'Frontend & Motion Developer',
+    challenge: 'Keep scroll and slider interactions smooth while packing the page with schedules, trainers, and pricing content.',
+    solution: 'Layered Framer Motion and GSAP with hardware-friendly transforms and lazy slider updates so motion stays fluid on real devices.',
+    keyFeatures: [
+      'Kinetic hero and scroll-triggered sections',
+      'Class schedule and plan layouts',
+      'Trainer and testimonial sliders',
+      'Responsive dark product aesthetic',
+    ]
   },
   {
     id: 6,
-    title: 'Hotel Landing Page',
-    description:
-      'A modern hotel landing page built with HTML, CSS, and JavaScript, featuring a responsive design and built for a real client!.',
-    tech: ['HTML', 'CSS',  'JavaScript'],
-    category: 'Frontend',
+    title: 'Luxury Hotel Landing Page',
+    slug: 'hotel-landing',
+    subtitle: 'Editorial web experience for a luxury hospitality brand',
+    description: 'Client landing experience for a boutique hotel — suites, amenities, galleries, and booking inquiry flows presented with restrained editorial design.',
+    category: 'Web',
+    tags: ['Web'],
+    productType: 'Web Experience',
+    featured: false,
     liveUrl: null,
     githubUrl: 'https://github.com/SivaRam6461/Hotel-Landing-Page',
-    featured: true,
-    gradient: 'linear-gradient(135deg, #0e7490, #1d4ed8)',
-    //emoji: '🍔',
-    //image: 'public/images/BD logo.jpg ',
+    gradient: 'from-amber-500 to-yellow-600',
+    coverImage: '/images/p6.1.png',
     images: [
       '/images/p6.1.png',
       '/images/p6.2.png',
       '/images/p6.3.png',
-      '/images/p6.4.png',
       '/images/p6.5.png',
-      '/images/p6.6.png',
-
-    
-
-
-  ]
+    ],
+    tech: ['HTML5', 'CSS3', 'JavaScript (ES6+)', 'Flexbox/Grid'],
+    role: 'Frontend Developer',
+    challenge: 'Convey luxury brand aesthetics through typography and subtle micro-interactions.',
+    solution: 'Designed tailored editorial typography layouts with custom image hover reveals.',
+    keyFeatures: [
+      'Luxury suite gallery & amenity cards',
+      'Room reservation inquiry modal',
+      'Smooth scroll navigation',
+    ]
   },
-   {
+  {
     id: 7,
-    title: 'Photography Landing Page',
-    description:
-      'A modern photography landing page built with HTML, CSS, and JavaScript, featuring a responsive design and built for a real client!.',
-    tech: ['HTML', 'CSS',  'JavaScript'],
-    category: 'Frontend',
+    title: 'Aesthetic Photography Portfolio',
+    slug: 'photography-portfolio',
+    subtitle: 'Minimal web gallery product for high-resolution creative work',
+    description: 'Clean visual portfolio experience for photographers — masonry grid, lightbox previews, and fast image delivery without cluttering the work.',
+    category: 'Web',
+    tags: ['Web'],
+    productType: 'Web Experience',
+    featured: false,
     liveUrl: null,
     githubUrl: 'https://github.com/SivaRam6461/Photography-website',
-    featured: true,
-    gradient: 'linear-gradient(135deg, #0e7490, #1d4ed8)',
-    //emoji: '🍔',
-    //image: 'public/images/BD logo.jpg ',
+    gradient: 'from-blue-500 to-indigo-600',
+    coverImage: '/images/p7.1.png',
     images: [
       '/images/p7.1.png',
       '/images/p7.2.png',
       '/images/p7.3.png',
       '/images/p7.4.png',
-     
-
-
-  ]
-  },
- 
+    ],
+    tech: ['HTML5', 'CSS3', 'JavaScript'],
+    role: 'Frontend Developer',
+    challenge: 'Balancing image fidelity with rapid load speeds.',
+    solution: 'Applied modern image compression and grid layouts for crisp galleries that stay fast.',
+    keyFeatures: [
+      'Masonry photography grid',
+      'Full-bleed lightbox preview',
+      'Contact & booking CTA',
+    ]
+  }
 ];
 
-// ── All filter tabs derived from projects (don't need to edit this)
-export const projectFilters = ['All', ...new Set(projects.map((p) => p.category))];
-
-// ── Experience / timeline entries
 export const experience = [
   {
     id: 1,
     role: 'Full Stack Developer Intern',
     company: 'Cognifyz Technologies',
     period: '2025',
-    type: 'internship',   // "internship" | "education"
-    description:
-      'Developed and maintained MERN stack web applications. Collaborated with the team to build RESTful APIs, implemented JWT authentication, and improved UI/UX across multiple projects.',
-    skills: ['React.js', 'Node.js', 'MongoDB', 'REST APIs'],
+    type: 'internship',
+    location: 'Remote',
+    description: 'Collaborated on production full-stack web products. Designed and deployed RESTful endpoints, implemented authentication and role-based access flows, and improved frontend component load times.',
+    achievements: [
+      'Architected scalable Express REST API endpoints connected to MongoDB database.',
+      'Implemented secure authentication and role-based access controllers.',
+      'Refactored legacy UI components into reusable React modules with state isolation.',
+    ],
+    skills: ['React.js', 'Node.js', 'Express.js', 'MongoDB', 'REST APIs', 'Authentication'],
   },
   {
     id: 2,
@@ -294,9 +381,14 @@ export const experience = [
     company: 'Internshala',
     period: '2024',
     type: 'internship',
-    description:
-      'Completed structured training and project work in web development. Built responsive frontends with HTML, CSS, and JavaScript while learning full-stack fundamentals.',
-    skills: ['HTML', 'CSS', 'JavaScript', 'Responsive Design'],
+    location: 'Remote',
+    description: 'Completed hands-on software development training and project builds focusing on full-stack fundamentals, responsive UI patterns, and modern JavaScript standards.',
+    achievements: [
+      'Built multi-page responsive web applications from wireframes.',
+      'Mastered DOM manipulation, AJAX/Fetch API integration, and asynchronous JS.',
+      'Constructed clean frontend user interfaces following web accessibility standards.',
+    ],
+    skills: ['HTML5', 'CSS3', 'JavaScript (ES6+)', 'DOM Manipulation', 'Responsive Web Design'],
   },
   {
     id: 3,
@@ -304,26 +396,13 @@ export const experience = [
     company: 'Teerthanker Mahaveer University',
     period: '2022 – 2026',
     type: 'education',
-    description:
-      'I completed my B.Tech in Computer Science and Engineering with a specialization in Artificial Intelligence, Machine Learning, and Deep Learning (AI/ML/DL). During my academic journey, I built a strong foundation in data structures, algorithms, object-oriented programming, database management, and software engineering. Alongside this, I gained hands-on experience in full-stack web development through internships and personal projects using React.js, Node.js, Express.js, MongoDB, JavaScript, HTML, and CSS.',
-    skills: ['AI/ML/DL', 'Python', 'Data Structures', 'Algorithms'],
+    location: 'Moradabad, India',
+    description: 'Pursuing Bachelor of Technology in CS with specialization in Artificial Intelligence, Machine Learning, and Software Engineering. Strong academic emphasis on Data Structures, Algorithms, OOP, Database Management, and Web Development.',
+    achievements: [
+      'Consistently maintained strong academic standing across CS & AI coursework.',
+      'Led team development for full-stack academic projects.',
+      'Specialized in Python AI algorithms, Data Structures, and full-stack product engineering.',
+    ],
+    skills: ['AI / Machine Learning', 'Python', 'Data Structures & Algorithms', 'DBMS', 'OOP'],
   },
 ];
-
-// ── Testimonials — ONLY add real quotes from real people here.
-// Never invent names, companies, or quotes — fabricated testimonials
-// are a serious credibility risk on a professional portfolio.
-// The section (and its nav link) automatically hides itself while
-// this array is empty, and appears once you add real entries.
-//
-// Shape of each entry:
-// {
-//   id: 1,
-//   name: 'Full Name',
-//   role: 'Their Job Title',
-//   company: 'Their Company',       // optional — omit if not applicable
-//   quote: 'What they actually said, verbatim or lightly trimmed.',
-//   rating: 5,                      // 1–5, only include if they gave one
-//   avatar: '/images/reviewer1.jpg', // optional — omit to show initials instead
-// }
-export const testimonials = [];

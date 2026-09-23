@@ -8,8 +8,8 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--cyan), var(--purple), var(--pink));
+  background: linear-gradient(90deg, #ff5722, #ff8c00, #ffca28);
   transform-origin: left;
-  z-index: 200; /* above navbar (100) so it's always visible */
+  z-index: 200; /* above navbar (50) so it's always visible */
   pointer-events: none;
 }

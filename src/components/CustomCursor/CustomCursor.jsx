@@ -1,98 +1,81 @@
 /* ============================================================
-   components/CustomCursor/CustomCursor.jsx
-   A small dot + lagging ring that follows the mouse, with a
-   hover state over interactive elements. Only enabled for
-   fine-pointer devices (real mice) that don't prefer reduced
-   motion — touch devices and accessibility preferences always
-   get the normal system cursor untouched.
+   src/components/CustomCursor/CustomCursor.jsx
+   Fluid Custom Cursor in Orange & White Theme
    ============================================================ */
 
-import { useEffect, useRef, useState } from 'react';
-import './CustomCursor.css';
-
-const INTERACTIVE_SELECTOR = 'a, button, input, textarea, [role="button"], .tag, .skill-pill';
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 
 export default function CustomCursor() {
-  const dotRef = useRef(null);
-  const ringRef = useRef(null);
-  const [enabled, setEnabled] = useState(false);
-  const [hovering, setHovering] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: -100, y: -100 });
+  const [cursorVariant, setCursorVariant] = useState('default');
+  const [cursorText, setCursorText] = useState('');
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const finePointer = window.matchMedia('(pointer: fine)').matches;
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    setEnabled(finePointer && !reducedMotion);
-  }, []);
+    if (window.innerWidth < 1024) return;
+    document.body.classList.add('has-custom-cursor');
 
-  useEffect(() => {
-    if (!enabled) return;
+    const handleMouseMove = (e) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+      if (!isVisible) setIsVisible(true);
 
-    document.body.classList.add('custom-cursor-active');
-
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
-    let ringX = mouseX;
-    let ringY = mouseY;
-    let rafId;
-
-    const onMove = (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      if (dotRef.current) {
-        dotRef.current.style.left = `${mouseX}px`;
-        dotRef.current.style.top = `${mouseY}px`;
+      const target = e.target;
+      const clickable = target.closest('a, button, [role="button"], input, textarea, .cursor-pointer');
+      
+      if (clickable) {
+        setCursorVariant('hover');
+        if (target.closest('[data-cursor="view"]')) {
+          setCursorText('VIEW');
+        } else {
+          setCursorText('');
+        }
+      } else {
+        setCursorVariant('default');
+        setCursorText('');
       }
     };
 
-    const animateRing = () => {
-      ringX += (mouseX - ringX) * 0.18;
-      ringY += (mouseY - ringY) * 0.18;
-      if (ringRef.current) {
-        ringRef.current.style.left = `${ringX}px`;
-        ringRef.current.style.top = `${ringY}px`;
-      }
-      rafId = requestAnimationFrame(animateRing);
-    };
+    const handleMouseLeave = () => setIsVisible(false);
 
-    const onOver = (e) => {
-      if (e.target.closest?.(INTERACTIVE_SELECTOR)) setHovering(true);
-    };
-    const onOut = (e) => {
-      if (e.target.closest?.(INTERACTIVE_SELECTOR)) setHovering(false);
-    };
-    const onLeaveWindow = () => {
-      if (dotRef.current) dotRef.current.style.opacity = '0';
-      if (ringRef.current) ringRef.current.style.opacity = '0';
-    };
-    const onEnterWindow = () => {
-      if (dotRef.current) dotRef.current.style.opacity = '1';
-      if (ringRef.current) ringRef.current.style.opacity = '1';
-    };
-
-    window.addEventListener('mousemove', onMove, { passive: true });
-    document.addEventListener('mouseover', onOver);
-    document.addEventListener('mouseout', onOut);
-    document.addEventListener('mouseleave', onLeaveWindow);
-    document.addEventListener('mouseenter', onEnterWindow);
-    rafId = requestAnimationFrame(animateRing);
+    window.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseleave', handleMouseLeave);
 
     return () => {
-      document.body.classList.remove('custom-cursor-active');
-      window.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseover', onOver);
-      document.removeEventListener('mouseout', onOut);
-      document.removeEventListener('mouseleave', onLeaveWindow);
-      document.removeEventListener('mouseenter', onEnterWindow);
-      cancelAnimationFrame(rafId);
+      document.body.classList.remove('has-custom-cursor');
+      window.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, [enabled]);
+  }, [isVisible]);
 
-  if (!enabled) return null;
+  if (!isVisible) return null;
 
   return (
     <>
-      <div ref={dotRef} className="custom-cursor-dot" aria-hidden="true" />
-      <div ref={ringRef} className={`custom-cursor-ring ${hovering ? 'hovering' : ''}`} aria-hidden="true" />
+      {/* Small trailing pointer dot */}
+      <motion.div
+        className="fixed top-0 left-0 w-2.5 h-2.5 bg-orange-500 rounded-full pointer-events-none z-[9999] mix-blend-difference"
+        animate={{
+          x: mousePosition.x - 5,
+          y: mousePosition.y - 5,
+        }}
+        transition={{ type: 'spring', stiffness: 1000, damping: 50, mass: 0.1 }}
+      />
+
+      {/* Outer fluid trailing ring */}
+      <motion.div
+        className="fixed top-0 left-0 rounded-full pointer-events-none z-[9998] flex items-center justify-center font-mono text-[9px] font-bold tracking-widest text-orange-300 border border-orange-500/50 bg-orange-500/15 backdrop-blur-[2px]"
+        animate={{
+          x: mousePosition.x - (cursorVariant === 'hover' ? 24 : 16),
+          y: mousePosition.y - (cursorVariant === 'hover' ? 24 : 16),
+          width: cursorVariant === 'hover' ? 48 : 32,
+          height: cursorVariant === 'hover' ? 48 : 32,
+          scale: cursorVariant === 'hover' ? 1.2 : 1,
+        }}
+        transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+      >
+        {cursorText}
+      </motion.div>
     </>
   );
 }

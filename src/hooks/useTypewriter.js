@@ -4,7 +4,7 @@
    animation. Returns the current visible string.
 
    Usage:
-     const text = useTypewriter(['React Dev', 'MERN Engineer']);
+     const text = useTypewriter(['AI Products', 'Automation', 'SaaS']);
    ============================================================ */
 
 import { useState, useEffect } from 'react';

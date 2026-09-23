@@ -1,5 +1,12 @@
 node_modules
 dist
 .env
-.env.local
+.env.*
+!.env.example
 .claude
+.vercel
+.vite
+.cache
+*.log
+.DS_Store
+Thumbs.db

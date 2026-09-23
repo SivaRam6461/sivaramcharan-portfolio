@@ -1,12 +1,12 @@
 {
-  "name": "Sivaram Charan | Full Stack Developer",
+  "name": "Sivaram Charan | Full Stack AI Developer",
   "short_name": "Sivaram Charan",
   "icons": [
     { "src": "/favicon-32.png", "sizes": "32x32", "type": "image/png" },
     { "src": "/favicon-512.png", "sizes": "512x512", "type": "image/png" }
   ],
-  "theme_color": "#050816",
-  "background_color": "#050816",
+  "theme_color": "#ff5722",
+  "background_color": "#0b0c10",
   "display": "standalone",
   "start_url": "/"
 }

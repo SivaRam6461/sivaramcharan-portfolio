@@ -1,182 +1,191 @@
 /* ============================================================
-   components/Projects/Projects.jsx
-   Filterable project card grid.
-   Filter buttons show/hide cards by category.
-   ============================================================ */
+    src/components/Projects/Projects.jsx
+    Premium Editorial Project Archive with Cinematic Stacking Scroll
+    ============================================================ */
 
-
-import { Reveal, RevealGroup, RevealItem } from '../Reveal/Reveal';
-import { projects, projectFilters } from '../../data/portfolioData';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
+import { ArrowUpRight, X, CheckCircle2 } from 'lucide-react';
+import { GithubIcon } from '../Icons';
+import { projects } from '../../data/portfolioData';
+import { lockScroll, unlockScroll, onLenisScroll } from '../../utils/scroll';
+import ProjectsStacking from './stacking-card';
 import './Projects.css';
-import { useState, useEffect } from 'react';
 
-/* ── Small SVG icons used in buttons ── */
-const ExternalLinkIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-       stroke="currentColor" strokeWidth="2.5">
-    <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
-    <polyline points="15 3 21 3 21 9"/>
-    <line x1="10" y1="14" x2="21" y2="3"/>
-  </svg>
-);
+// Product-type filters only — categories appear solely when a real project matches.
+// No empty SaaS / AI / Mobile pills (no projects of those types in data yet).
+const CATEGORY_ORDER = ['Full Stack', 'Web'];
+const FILTER_TABS = [
+  { id: 'all', label: 'All Work' },
+  ...CATEGORY_ORDER.filter(c => projects.some(p => (p.tags || []).includes(c))).map(c => ({ id: c, label: c })),
+];
 
-const GithubIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-  </svg>
-);
+const variantSrcSet = (src) => {
+  const match = src.match(/^(.*)\.([^.]+)$/);
+  if (!match) return undefined;
+  const [, base, ext] = match;
+  return `${base}-480w.${ext} 480w, ${base}-720w.${ext} 720w, ${src} 1024w`;
+};
 
-/* Each project image ships as 480w/720w/960w WebP variants
-   (see public/images/*-480w.webp, *-720w.webp). This builds the
-   srcset from the base 960w path referenced in portfolioData.js. */
-function buildSrcSet(src) {
-  const dot = src.lastIndexOf('.');
-  const base = src.slice(0, dot);
-  const ext = src.slice(dot);
-  return [
-    `${encodeURI(`${base}-480w${ext}`)} 480w`,
-    `${encodeURI(`${base}-720w${ext}`)} 720w`,
-    `${encodeURI(src)} 960w`,
-  ].join(', ');
-}
-
-const THUMB_SIZES = '(max-width: 480px) 100vw, (max-width: 1100px) 45vw, 480px';
-
-/* ── Single project card ── */
-function ProjectCard({ project }) {
-   const [isHovering, setIsHovering] = useState(false);
-const [current, setCurrent] = useState(0);
-
-  // auto slide when card is hovered or clicked
-useEffect(() => {
-  if (!isHovering) return;
-  if (!project?.images || project.images.length === 0) return;
-
-  const interval = setInterval(() => {
-    setCurrent((prev) =>
-      prev === project.images.length - 1 ? 0 : prev + 1
-    );
-  }, 1500);
-
-  return () => clearInterval(interval);
-}, [isHovering, project?.images]);
-  
-  return (
-    <RevealItem className="project-card"
-  onMouseEnter={() => setIsHovering(true)}
-  onMouseLeave={() => {
-    setIsHovering(false);
-    setCurrent(0); // reset to first image
-  }}>
-     {/* ---------------------------------------------------------------------------------------------- */}
-      {/* IMAGE SLIDER */}
-      <div className="project-thumb slider" onClick={() => setCurrent(0)}>
-        {project.images && project.images.length > 0 ? (
-  <div
-    className="slider-track"
-    style={{
-      transform: `translateX(-${current * 100}%)`
-    }}
-  >
-    {project.images.map((img, i) => (
-      <img
-        key={i}
-        src={img}
-        srcSet={buildSrcSet(img)}
-        sizes={THUMB_SIZES}
-        alt={`${project.title} — screenshot ${i + 1} of ${project.images.length}`}
-        loading="lazy"
-        decoding="async"
-      />
-    ))}
-  </div>
-) : (
-  <span className="project-emoji">{project.emoji}</span>
-)}
-
-        <div className="project-badges">
-          <span className="badge-cat">{project.category}</span>
-          {project.featured && <span className="badge-feat">⭐ Featured</span>}
-        </div>
-      </div>
-      {/* ---------------------------------------------------------------------------------------------- */}
-
-      {/* Card body */}
-      <div className="project-body">
-        <h3 className="project-title">{project.title}</h3>
-        <p className="project-desc">{project.description}</p>
-
-        {/* Tech stack pills */}
-        <div className="project-tech">
-          {project.tech.map((t) => (
-            <span className="tech-tag" key={t}>{t}</span>
-          ))}
-        </div>
-
-        {/* Action buttons — only rendered when a real URL exists */}
-        <div className="project-links">
-          {project.liveUrl && (
-            <a href={project.liveUrl} target="_blank" rel="noreferrer"
-               className="project-btn project-btn-primary">
-              <ExternalLinkIcon /> Live Demo
-            </a>
-          )}
-          {project.githubUrl && (
-            <a href={project.githubUrl} target="_blank" rel="noreferrer"
-               className="project-btn project-btn-ghost">
-              <GithubIcon /> GitHub
-            </a>
-          )}
-        </div>
-      </div>
-    </RevealItem>
-  );
-}
-
-/* ── Main section component ── */
 export default function Projects() {
-  const [activeFilter, setActiveFilter] = useState('All');
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [selectedProject, setSelectedProject] = useState(null);
+  const dialogRef = useRef(null);
 
-  const filtered = activeFilter === 'All'
-    ? projects
-    : projects.filter((p) => p.category === activeFilter);
+  const filteredProjects = useMemo(
+    () => projects.filter(p => activeCategory === 'all' || (p.tags || []).includes(activeCategory)),
+    [activeCategory]
+  );
+
+  const scrollProgress = useMotionValue(0);
+
+  useEffect(() => {
+    const off = onLenisScroll((opts) => {
+      scrollProgress.set(opts.progress ?? 0);
+    });
+    scrollProgress.set(0);
+    return off;
+  }, []);
+
+  const progressWidth = useTransform(scrollProgress, [0, 1], [0, 100]);
+
+  // Case study modal
+  useEffect(() => {
+    if (!selectedProject) return;
+    const prevFocus = document.activeElement;
+    const dialog = dialogRef.current;
+    const focusables = dialog ? [...dialog.querySelectorAll('button, a[href], [tabindex]:not([tabindex="-1"])')] : [];
+    (focusables[0] || dialog)?.focus();
+    lockScroll();
+    const onKeydown = (e) => {
+      if (e.key === 'Escape') { setSelectedProject(null); return; }
+      if (e.key === 'Tab' && focusables.length) {
+        const first = focusables[0], last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
+    document.addEventListener('keydown', onKeydown);
+    return () => { document.removeEventListener('keydown', onKeydown); unlockScroll(); prevFocus?.focus?.(); };
+  }, [selectedProject]);
 
   return (
-    <section id="projects">
-      <div className="section">
+    <section id="projects" className="projects-section">
+      <div className="projects-bg-grid" aria-hidden="true" />
+      <div className="projects-bg-dots" aria-hidden="true" />
+      <div className="projects-bg-word" aria-hidden="true">WORK</div>
 
-        {/* Header row: title + filter tabs */}
+      <div className="projects-container">
+
+        {/* ═══ SECTION HEADER ═══ */}
         <div className="projects-header">
-          <Reveal>
-            <span className="section-label">What I've built</span>
-            <h2 className="section-title">
-              My <span className="gradient-text">Projects</span>
-            </h2>
-          </Reveal>
-
-          {/* Filter buttons — generated from projectFilters in portfolioData */}
-          <Reveal className="filter-tabs">
-            {projectFilters.map((f) => (
-              <button
-                key={f}
-                className={`filter-btn ${activeFilter === f ? 'active' : ''}`}
-                onClick={() => setActiveFilter(f)}
-              >
-                {f}
-              </button>
-            ))}
-          </Reveal>
+          <div className="projects-eyebrow">
+            <span className="projects-eyebrow-dot" />
+            <span>04 // Selected Work</span>
+          </div>
+          <h2 className="projects-heading">IDEAS.<br />BUILT.<br /><span className="accent">SHIPPED.</span></h2>
+          <p className="projects-desc">Real products and experiences — full-stack builds and web work — from idea to working software.</p>
+          <div className="projects-handwriting">proof is in <span>the build.</span><span className="arrow">↘</span></div>
         </div>
 
-        {/* Project cards — filtered list. Keyed on activeFilter so the
-            stagger animation replays when the filter changes. */}
-        <RevealGroup className="projects-grid" key={activeFilter}>
-          {filtered.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </RevealGroup>
+        {/* ═══ FILTER NAVIGATION ═══ */}
+        <div className="projects-filter-wrapper">
+          <div className="projects-filter-label">Explore by</div>
+          <div className="projects-filter-row">
+            {FILTER_TABS.map((cat) => (
+              <button key={cat.id} onClick={() => setActiveCategory(cat.id)} className={`projects-filter-pill ${activeCategory === cat.id ? 'active' : ''}`}>{cat.label}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* ═══ PROGRESS BAR ═══ */}
+        <div style={{ position: 'sticky', top: '80px', zIndex: '5', marginBottom: '12px' }}>
+          <div style={{ flex: 1, height: '1px', background: 'rgba(11,11,11,0.08)', position: 'relative' }}>
+            <motion.div style={{ height: '100%', background: '#FF4F12', width: progressWidth }} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: '#0B0B0B' }}>
+              PROJECTS
+            </span>
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: '#FF4F12' }}>
+              {filteredProjects.length > 0 ? `01 / 0${filteredProjects.length}` : '00 / 00'}
+            </span>
+          </div>
+        </div>
+
+        {/* ═══ STACKING SCROLL CONTAINER ═══ */}
+        <div className="projects-stack-container">
+          <ProjectsStacking projects={filteredProjects} onView={setSelectedProject} />
+        </div>
+
+        {/* ═══ SECTION ENDING ═══ */}
+        <div className="projects-ending">
+          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: '#FF4F12', marginBottom: '16px' }}>
+            0{filteredProjects.length} / 0{filteredProjects.length}
+          </div>
+          <h3 className="projects-ending-title">MORE IS<br /><span className="accent">ALWAYS</span><br />BEING BUILT.</h3>
+          <div className="projects-ending-handwriting">the next one <span>could be yours.</span><span className="arrow">↗</span></div>
+        </div>
 
       </div>
+
+      {/* ═══ CASE STUDY MODAL ═══ */}
+      <AnimatePresence>
+        {selectedProject && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="case-study-overlay" onClick={() => setSelectedProject(null)}>
+            <motion.div
+              ref={dialogRef} role="dialog" aria-modal="true"
+              initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              transition={{ duration: 0.3 }} onClick={(e) => e.stopPropagation()} className="case-study-modal"
+            >
+              <div className="case-study-header">
+                <div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+                    <span className="case-study-meta-item">{selectedProject.category}</span>
+                    {selectedProject.featured && <span className="case-study-meta-item" style={{ background: 'rgba(251,191,36,0.1)', color: '#b45309', borderColor: 'rgba(251,191,36,0.3)' }}>Featured</span>}
+                  </div>
+                  <h3 className="case-study-title">{selectedProject.title}</h3>
+                </div>
+                <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedProject(null); }} className="case-study-close" aria-label="Close Case Study"><X className="w-4 h-4" /></button>
+              </div>
+              <div className="case-study-meta">
+                <span className="case-study-meta-item">Role: {selectedProject.role || '—'}</span>
+                <span className="case-study-meta-item">Type: {selectedProject.category}</span>
+              </div>
+              <div className="case-study-image-frame">
+                <motion.img src={selectedProject.coverImage || selectedProject.image || '/images/p1.webp'} alt={selectedProject.title} srcSet={variantSrcSet(selectedProject.coverImage || selectedProject.image || '/images/p1.webp')} initial={{ opacity: 0, scale: 1.05 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6 }} style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }} />
+              </div>
+              <div className="case-study-section-label">The Challenge</div>
+              <p className="case-study-text">{selectedProject.challenge || 'Turning a product idea into a clear, usable digital experience.'}</p>
+              <div className="case-study-section-label">The Solution</div>
+              <p className="case-study-text">{selectedProject.solution || 'Designed and built the product workflow across interface, services, and data.'}</p>
+              {selectedProject.keyFeatures && selectedProject.keyFeatures.length > 0 && (
+                <>
+                  <div className="case-study-section-label">Key Deliverables</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '24px' }}>
+                    {selectedProject.keyFeatures.map((feat, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'start', gap: '8px', fontFamily: "'Space Grotesk', sans-serif", fontSize: '13px', color: '#555', lineHeight: '1.5' }}>
+                        <CheckCircle2 className="w-4 h-4 text-[#FF4F12] shrink-0 mt-0.5" /><span>{feat}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+              <div className="case-study-section-label">Technology</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '28px' }}>
+                {(selectedProject.tech || selectedProject.tags || []).map((t, i) => (
+                  <span key={i} style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', padding: '4px 10px', borderRadius: '100px', background: 'rgba(11,11,11,0.04)', border: '1px solid rgba(11,11,11,0.08)', color: '#555' }}>{t}</span>
+                ))}
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', paddingTop: '20px', borderTop: '1px solid rgba(11,11,11,0.08)' }}>
+                {selectedProject.liveUrl && <a href={selectedProject.liveUrl} target="_blank" rel="noreferrer" className="project-card-btn primary" style={{ padding: '12px 28px', fontSize: '12px' }}>VIEW LIVE <ArrowUpRight className="w-4 h-4" /></a>}
+                {selectedProject.githubUrl && <a href={selectedProject.githubUrl} target="_blank" rel="noreferrer" className="project-card-btn ghost" style={{ padding: '12px 28px', fontSize: '12px' }}><GithubIcon className="w-4 h-4" /> GITHUB</a>}
+                <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedProject(null); }} className="project-card-btn ghost" style={{ padding: '12px 28px', fontSize: '12px', borderColor: '#FF4F12', color: '#FF4F12' }}>Close Case Study</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
