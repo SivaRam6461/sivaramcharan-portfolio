@@ -3,6 +3,9 @@
 @layer base {
   html {
     overflow-x: clip;
+    /* Lenis owns smooth scrolling — never add scroll-behavior: smooth
+       here or it double-smooths and feels sticky. */
+    scroll-behavior: auto;
   }
 
   :root {

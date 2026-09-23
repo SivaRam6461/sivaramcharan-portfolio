@@ -170,37 +170,52 @@ export default function About() {
     checkDesktop();
     window.addEventListener('resize', checkDesktop);
 
+    // rAF-throttle: measuring every chapter/timeline rect on each raw
+    // scroll event + setState re-renders the section mid-scroll (jank).
+    let rafId = null;
     const handleScroll = () => {
-      const focalPoint = window.innerHeight * 0.35;
-      let closest = 'intro';
-      let minDist = Infinity;
+      if (rafId != null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        const focalPoint = window.innerHeight * 0.35;
+        let closest = 'intro';
+        let minDist = Infinity;
 
-      CHAPTERS.forEach((c) => {
-        const el = document.getElementById(`about-${c.id}`);
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          const dist = Math.abs(rect.top - focalPoint);
-          if (rect.top <= window.innerHeight * 0.8 && dist < minDist) {
-            minDist = dist;
-            closest = c.id;
+        CHAPTERS.forEach((c) => {
+          const el = document.getElementById(`about-${c.id}`);
+          if (el) {
+            const rect = el.getBoundingClientRect();
+            const dist = Math.abs(rect.top - focalPoint);
+            if (rect.top <= window.innerHeight * 0.8 && dist < minDist) {
+              minDist = dist;
+              closest = c.id;
+            }
           }
-        }
-      });
+        });
 
-      setActiveChapter(closest);
+        setActiveChapter((prev) => (prev === closest ? prev : closest));
 
-      // Timeline intersection
-      const newVisible = new Set();
-      TIMELINE.forEach((_, i) => {
-        const el = document.getElementById(`timeline-${i}`);
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          if (rect.top < window.innerHeight * 0.75) {
-            newVisible.add(i);
+        const newVisible = new Set();
+        TIMELINE.forEach((_, i) => {
+          const el = document.getElementById(`timeline-${i}`);
+          if (el) {
+            const rect = el.getBoundingClientRect();
+            if (rect.top < window.innerHeight * 0.75) {
+              newVisible.add(i);
+            }
           }
-        }
+        });
+        setVisibleTimeline((prev) => {
+          if (prev.size === newVisible.size) {
+            let same = true;
+            newVisible.forEach((i) => {
+              if (!prev.has(i)) same = false;
+            });
+            if (same) return prev;
+          }
+          return newVisible;
+        });
       });
-      setVisibleTimeline(newVisible);
     };
 
     handleScroll();
@@ -208,6 +223,7 @@ export default function About() {
     return () => {
       window.removeEventListener('resize', checkDesktop);
       window.removeEventListener('scroll', handleScroll);
+      if (rafId != null) cancelAnimationFrame(rafId);
     };
   }, []);
 

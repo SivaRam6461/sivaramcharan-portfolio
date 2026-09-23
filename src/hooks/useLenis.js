@@ -9,20 +9,18 @@ export default function useLenis() {
     ).matches;
 
     const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      duration: 1.1,
+      // Softer ease-in-out: long expo ease above feels like the page
+      // "sticks" then lurches when many scroll listeners also run.
+      easing: (t) => 1 - Math.pow(1 - t, 3),
       smoothWheel: !prefersReducedMotion,
+      syncTouch: false,
       touchMultiplier: 1.5,
+      wheelMultiplier: 1,
+      autoRaf: true,
     });
 
     setLenis(lenis);
-
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
 
     return () => {
       setLenis(null);

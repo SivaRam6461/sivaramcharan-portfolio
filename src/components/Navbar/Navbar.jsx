@@ -18,36 +18,54 @@ export default function Navbar({ onOpenCmd }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
+    // Cache section offsets — re-reading layout every scroll frame
+    // forces reflow and is a major source of scroll jank.
+    let projectsEnd = window.innerHeight;
+    const sectionTops = [];
 
-      // Light (warm-white) theme while the navbar overlaps any light
-      // section — Hero through Projects (incl. About/Skills). Goes
-      // dark once past the Projects section (GithubStats onwards).
+    const measure = () => {
       const projectsSec = document.getElementById('projects');
-      const lightEnd = projectsSec
+      projectsEnd = projectsSec
         ? projectsSec.offsetTop + projectsSec.offsetHeight
         : window.innerHeight;
-      setIsOverHero(scrollY + 64 < lightEnd); // 64 = navbar height
+      sectionTops.length = 0;
+      NAV_ITEMS.forEach((item) => {
+        const el = document.getElementById(item.id);
+        sectionTops.push({ id: item.id, top: el ? el.offsetTop : Infinity });
+      });
+    };
 
-      const sections = NAV_ITEMS.map((item) => document.getElementById(item.id));
+    let rafId = null;
+    const apply = () => {
+      rafId = null;
+      const scrollY = window.scrollY;
+      setIsOverHero(scrollY + 64 < projectsEnd);
+
       const scrollPos = scrollY + 250;
-
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const sec = sections[i];
-        if (sec && sec.offsetTop <= scrollPos) {
-          setActiveSection(NAV_ITEMS[i].id);
+      let next = sectionTops[0]?.id || 'hero';
+      for (let i = sectionTops.length - 1; i >= 0; i--) {
+        if (sectionTops[i].top <= scrollPos) {
+          next = sectionTops[i].id;
           break;
         }
       }
+      setActiveSection((prev) => (prev === next ? prev : next));
     };
 
-    handleScroll();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleScroll);
+    const schedule = () => {
+      if (rafId == null) rafId = requestAnimationFrame(apply);
+    };
+
+    measure();
+    apply();
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', () => {
+      measure();
+      schedule();
+    });
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
+      window.removeEventListener('scroll', schedule);
+      if (rafId != null) cancelAnimationFrame(rafId);
     };
   }, []);
 

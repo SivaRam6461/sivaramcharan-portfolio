@@ -68,10 +68,14 @@ function StackingCard({ i, project, total, progress, onView }) {
     const update = () => {
       rafId = null;
       const rect = el.getBoundingClientRect();
+      // Off-screen wrappers: don't thrash layout every frame.
+      if (rect.bottom < -200 || rect.top > window.innerHeight + 200) return;
       const vh = window.innerHeight;
       const denom = Math.max(vh - stickTop, 1);
       const p = 1 - (rect.top - stickTop) / denom;
-      imgProgress.set(Math.min(Math.max(p, 0), 1));
+      const clamped = Math.min(Math.max(p, 0), 1);
+      if (Math.abs(clamped - imgProgress.get()) < 0.002) return;
+      imgProgress.set(clamped);
     };
     const schedule = () => {
       if (rafId == null) rafId = requestAnimationFrame(update);
@@ -207,9 +211,14 @@ export default function ProjectsStacking({ projects = [], onView }) {
     const update = () => {
       rafId = null;
       const rect = el.getBoundingClientRect();
+      // Skip work when the stacking section is entirely off-screen —
+      // avoids forced layout on every frame while elsewhere on the page.
+      if (rect.bottom < -200 || rect.top > window.innerHeight + 200) return;
       const denom = rect.height - window.innerHeight;
       const p = denom > 0 ? -rect.top / denom : 0;
-      progress.set(Math.min(Math.max(p, 0), 1));
+      const clamped = Math.min(Math.max(p, 0), 1);
+      if (Math.abs(clamped - progress.get()) < 0.001) return;
+      progress.set(clamped);
     };
     const schedule = () => {
       if (rafId == null) rafId = requestAnimationFrame(update);

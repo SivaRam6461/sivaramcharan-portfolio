@@ -11,6 +11,9 @@ import App from './App';
 
 // Global CSS — variables, resets, utility classes, animations
 import './styles/globals.css';
+// Required by Lenis (html.lenis height + overscroll rules) — without it
+// smooth scroll fights the browser and feels sticky/stuttery.
+import 'lenis/dist/lenis.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
